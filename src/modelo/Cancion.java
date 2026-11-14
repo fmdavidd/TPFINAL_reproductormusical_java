@@ -27,6 +27,9 @@ public class Cancion implements Reproducible {
         this.activo = activo;
     }
 
+    public Cancion() {
+    }
+
     public int getIdCancion() {
         return idCancion;
     }
