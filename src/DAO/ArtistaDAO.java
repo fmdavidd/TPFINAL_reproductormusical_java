@@ -4,7 +4,6 @@ import Conexion.ConexionBD;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
 
 import Enumeraciones.Genero;
@@ -51,12 +50,6 @@ public class ArtistaDAO extends GenericDAO<Artista> {
         return ok;
     }
 
-    public List<Artista> buscarPorNombre(String nombre) throws ConexionBDException {
-        return consultar("SELECT * FROM artista WHERE nombre LIKE ? AND activo = TRUE",
-                "%" + nombre + "%");
-    }
-
-    /** Asocia un genero al artista (si ya lo tiene no hace nada). */
     public void agregarGenero(int idArtista, Genero genero) throws ConexionBDException {
         if (cargarGeneros(idArtista).contains(genero)) {
             return;

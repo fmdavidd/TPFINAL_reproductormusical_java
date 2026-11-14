@@ -2,11 +2,9 @@ package DAO;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 import Excepciones.ConexionBDException;
 import modelo.Album;
-import modelo.Cancion;
 
 public class AlbumDAO extends GenericDAO<Album> {
 
@@ -37,14 +35,6 @@ public class AlbumDAO extends GenericDAO<Album> {
                         + "WHERE id_album = ?",
                 a.getTitulo(), a.getAnioLanzamiento(), a.getPortada(),
                 a.getArtista().getIdArtista(), a.getIdAlbum()) > 0;
-    }
-
-    public List<Album> listarPorArtista(int idArtista) throws ConexionBDException {
-        return consultar("SELECT * FROM album WHERE id_artista = ? AND activo = TRUE", idArtista);
-    }
-
-    public List<Cancion> cargarCanciones(int idAlbum) throws ConexionBDException {
-        return new CancionDAO().buscarPorAlbum(idAlbum);
     }
 
     @Override

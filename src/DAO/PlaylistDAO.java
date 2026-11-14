@@ -46,11 +46,6 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
                 p.getNombre(), p.getDescripcion(), p.isPublica(), p.getIdPlaylist()) > 0;
     }
 
-    /** Playlists activas de un usuario. */
-    public List<Playlist> listarPorUsuario(int idUsuario) throws ConexionBDException {
-        return consultar("SELECT * FROM playlist WHERE id_usuario = ? AND activo = TRUE", idUsuario);
-    }
-
     /** Agrega una cancion en la posicion indicada (orden de la List). */
     public void agregarCancion(int idPlaylist, int idCancion, int posicion) throws ConexionBDException {
         ejecutarUpdate(
