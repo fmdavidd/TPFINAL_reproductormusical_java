@@ -1,4 +1,4 @@
-package modelo;
+package Enumeraciones;
 
 public enum RolUsuario {
     NORMAL,

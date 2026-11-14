@@ -1,5 +1,7 @@
 package modelo;
 
+import Enumeraciones.RolUsuario;
+
 import java.time.LocalDate;
 
 public abstract class Usuario {
