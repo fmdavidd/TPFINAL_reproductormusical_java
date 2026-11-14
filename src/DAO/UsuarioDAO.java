@@ -47,11 +47,13 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
                 premiumONull(u), nivelAdminONull(u), u.getIdUsuario()) > 0;
     }
 
+    /** @return el usuario activo con ese email, o null si no existe. */
     public Usuario buscarPorEmail(String email) throws ConexionBDException {
         var lista = consultar("SELECT * FROM usuario WHERE email = ? AND activo = TRUE", email);
         return lista.isEmpty() ? null : lista.get(0);
     }
 
+    /** @return true si se agrego; false si la cancion ya era favorita. */
     public boolean agregarFavorito(int idUsuario, int idCancion) throws ConexionBDException {
         if (existeFavorito(idUsuario, idCancion)) {
             return false;
@@ -66,11 +68,13 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
                 idUsuario, idCancion) > 0;
     }
 
+    /** Guarda una accion del administrador con la fecha y hora actual. */
     public void registrarAccion(int idAdmin, String accion) throws ConexionBDException {
         ejecutarUpdate("INSERT INTO registro_accion (id_admin, fecha_hora, accion) VALUES (?, ?, ?)",
                 idAdmin, Timestamp.valueOf(java.time.LocalDateTime.now()), accion);
     }
 
+    // ---------- Privados ----------
 
     private boolean existeFavorito(int idUsuario, int idCancion) throws ConexionBDException {
         String sql = "SELECT 1 FROM favorito WHERE id_usuario = ? AND id_cancion = ?";
@@ -82,7 +86,7 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
                 return rs.next();
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al verificar favorito", e);
+            throw new ConexionBDException("Error al verificar favorito" + " - " + e.getMessage());
         }
     }
 
@@ -98,7 +102,7 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
                 }
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al cargar favoritos del usuario " + idUsuario, e);
+            throw new ConexionBDException("Error al cargar favoritos del usuario " + idUsuario + " - " + e.getMessage());
         }
         return ids;
     }
@@ -115,7 +119,7 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
                 }
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al cargar acciones del admin " + admin.getIdUsuario(), e);
+            throw new ConexionBDException("Error al cargar acciones del admin " + admin.getIdUsuario() + " - " + e.getMessage());
         }
     }
 

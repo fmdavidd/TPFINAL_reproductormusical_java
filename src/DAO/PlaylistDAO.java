@@ -79,7 +79,7 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
                 }
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al cargar canciones de la playlist " + idPlaylist, e);
+            throw new ConexionBDException("Error al cargar canciones de la playlist " + idPlaylist + " - " + e.getMessage());
         }
         return canciones;
     }

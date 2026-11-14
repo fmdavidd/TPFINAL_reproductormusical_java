@@ -56,6 +56,7 @@ public class ArtistaDAO extends GenericDAO<Artista> {
                 "%" + nombre + "%");
     }
 
+    /** Asocia un genero al artista (si ya lo tiene no hace nada). */
     public void agregarGenero(int idArtista, Genero genero) throws ConexionBDException {
         if (cargarGeneros(idArtista).contains(genero)) {
             return;
@@ -76,7 +77,7 @@ public class ArtistaDAO extends GenericDAO<Artista> {
                 }
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al cargar generos del artista " + idArtista, e);
+            throw new ConexionBDException("Error al cargar generos del artista " + idArtista + " - " + e.getMessage());
         }
         return generos;
     }
