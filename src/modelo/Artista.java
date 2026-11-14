@@ -19,6 +19,9 @@ public class Artista {
         this.generos = new HashSet<Genero>();
     }
 
+    public Artista() {
+    }
+
     public int getIdArtista() {
         return idArtista;
     }
