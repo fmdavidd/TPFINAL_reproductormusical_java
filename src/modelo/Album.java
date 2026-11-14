@@ -23,6 +23,9 @@ public class Album implements Reproducible {
         this.canciones = new ArrayList<Cancion>();
     }
 
+    public Album() {
+    }
+
     public int getIdAlbum() { return idAlbum; }
     public void setIdAlbum(int idAlbum) { this.idAlbum = idAlbum; }
     @Override public String getTitulo() { return titulo; }

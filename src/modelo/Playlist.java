@@ -23,6 +23,9 @@ public class Playlist implements Reproducible {
         this.canciones = new ArrayList<Cancion>();
     }
 
+    public Playlist() {
+    }
+
     public int getIdPlaylist() { return idPlaylist; }
     public void setIdPlaylist(int idPlaylist) { this.idPlaylist = idPlaylist; }
     public String getNombre() { return nombre; }
