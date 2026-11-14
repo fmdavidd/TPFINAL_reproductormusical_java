@@ -12,15 +12,22 @@ import java.util.List;
 
 import Excepciones.ConexionBDException;
 
-
+/**
+ * Clase abstracta que implementa la logica JDBC comun a todos los DAOs.
+ * Las subclases solo indican tabla, columna id y como mapear una fila.
+ */
 public abstract class GenericDAO<T> implements IGenericDAO<T> {
 
+    // ---------- Metodos que deben definir las subclases ----------
 
     protected abstract String getNombreTabla();
 
     protected abstract String getNombreColumnaId();
 
+    /** Convierte la fila actual del ResultSet en una entidad (no debe hacer rs.next()). */
     protected abstract T mapear(ResultSet rs) throws SQLException, ConexionBDException;
+
+    // ---------- Implementacion comun ----------
 
     @Override
     public boolean darDeBaja(int id) throws ConexionBDException {
@@ -54,7 +61,9 @@ public abstract class GenericDAO<T> implements IGenericDAO<T> {
         return consultar("SELECT * FROM " + getNombreTabla());
     }
 
+    // ---------- Helpers JDBC para las subclases ----------
 
+    /** Ejecuta un SELECT con PreparedStatement y mapea cada fila a T. */
     protected List<T> consultar(String sql, Object... params) throws ConexionBDException {
         List<T> lista = new ArrayList<>();
         try (Connection con = ConexionBD.getConnection();
@@ -66,21 +75,23 @@ public abstract class GenericDAO<T> implements IGenericDAO<T> {
                 }
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al consultar: " + sql, e);
+            throw new ConexionBDException("Error al consultar: " + sql + " - " + e.getMessage());
         }
         return lista;
     }
 
+    /** Ejecuta INSERT / UPDATE / DELETE y devuelve la cantidad de filas afectadas. */
     protected int ejecutarUpdate(String sql, Object... params) throws ConexionBDException {
         try (Connection con = ConexionBD.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             asignarParametros(ps, params);
             return ps.executeUpdate();
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al ejecutar: " + sql, e);
+            throw new ConexionBDException("Error al ejecutar: " + sql + " - " + e.getMessage());
         }
     }
 
+    /** Ejecuta un INSERT y devuelve el id autogenerado (o -1 si no hubo). */
     protected int ejecutarInsert(String sql, Object... params) throws ConexionBDException {
         try (Connection con = ConexionBD.getConnection();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -90,7 +101,7 @@ public abstract class GenericDAO<T> implements IGenericDAO<T> {
                 return keys.next() ? keys.getInt(1) : -1;
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al insertar: " + sql, e);
+            throw new ConexionBDException("Error al insertar: " + sql + " - " + e.getMessage());
         }
     }
 
