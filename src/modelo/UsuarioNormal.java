@@ -3,12 +3,15 @@ package modelo;
 import Enumeraciones.RolUsuario;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class UsuarioNormal extends Usuario {
     private boolean premium;
     private Set<Integer> favoritos;
+    private List<Playlist> playlists = new ArrayList<Playlist>();
 
     public UsuarioNormal(){
         super();
@@ -52,6 +55,24 @@ public class UsuarioNormal extends Usuario {
 
     public boolean esFavorita(int idCancion) {
         return favoritos.contains(idCancion);
+    }
+
+    public List<Playlist> getPlaylists() {
+        return new ArrayList<Playlist>(playlists);
+    }
+
+    public void setPlaylists(List<Playlist> playlists) {
+        if (playlists == null) {
+            this.playlists = new ArrayList<Playlist>();
+        } else {
+            this.playlists = new ArrayList<Playlist>(playlists);
+        }
+    }
+
+    public void agregarPlaylist(Playlist playlist) {
+        if (playlist != null) {
+            playlists.add(playlist);
+        }
     }
 
     @Override
