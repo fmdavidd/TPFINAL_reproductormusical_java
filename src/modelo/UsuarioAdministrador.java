@@ -1,5 +1,8 @@
 package modelo;
 
+import Enumeraciones.NivelAdmin;
+import Enumeraciones.RolUsuario;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
