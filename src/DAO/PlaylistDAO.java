@@ -46,7 +46,6 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
                 p.getNombre(), p.getDescripcion(), p.isPublica(), p.getIdPlaylist()) > 0;
     }
 
-    /** Agrega una cancion en la posicion indicada (orden de la List). */
     public void agregarCancion(int idPlaylist, int idCancion, int posicion) throws ConexionBDException {
         ejecutarUpdate(
                 "INSERT INTO playlist_cancion (id_playlist, id_cancion, posicion) VALUES (?, ?, ?)",
