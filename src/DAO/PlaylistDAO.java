@@ -46,6 +46,7 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
                 p.getNombre(), p.getDescripcion(), p.isPublica(), p.getIdPlaylist()) > 0;
     }
 
+    /** Agrega una cancion en la posicion indicada (orden de la List). */
     public void agregarCancion(int idPlaylist, int idCancion, int posicion) throws ConexionBDException {
         ejecutarUpdate(
                 "INSERT INTO playlist_cancion (id_playlist, id_cancion, posicion) VALUES (?, ?, ?)",
@@ -61,7 +62,6 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
                 idPlaylist, idCancion);
     }
 
-    /** Canciones activas de la playlist, ordenadas por posicion. */
     private List<Cancion> cargarCanciones(int idPlaylist) throws ConexionBDException {
         List<Cancion> canciones = new ArrayList<>();
         String sql = "SELECT c.* FROM cancion c "
