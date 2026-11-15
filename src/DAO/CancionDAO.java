@@ -2,8 +2,6 @@ package DAO;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
-import java.util.List;
 
 import Enumeraciones.Genero;
 import Excepciones.ConexionBDException;
@@ -41,24 +39,6 @@ public class CancionDAO extends GenericDAO<Cancion> {
                         + "id_artista = ?, id_album = ? WHERE id_cancion = ?",
                 c.getTitulo(), c.getDuracionSegundos(), c.getRutaArchivo(), c.getGenero().name(),
                 c.getArtista().getIdArtista(), idAlbumONull(c.getAlbum()), c.getIdCancion()) > 0;
-    }
-
-    public List<Cancion> buscarPorTitulo(String titulo) throws ConexionBDException {
-        return consultar("SELECT * FROM cancion WHERE titulo LIKE ? AND activo = TRUE",
-                "%" + titulo + "%");
-    }
-
-    public List<Cancion> buscarPorArtista(int idArtista) throws ConexionBDException {
-        return consultar("SELECT * FROM cancion WHERE id_artista = ? AND activo = TRUE", idArtista);
-    }
-
-    public List<Cancion> buscarPorGenero(Genero genero) throws ConexionBDException {
-        return consultar("SELECT * FROM cancion WHERE genero = ? AND activo = TRUE", genero.name());
-    }
-
-    /** Usado por AlbumDAO.cargarCanciones(). */
-    public List<Cancion> buscarPorAlbum(int idAlbum) throws ConexionBDException {
-        return consultar("SELECT * FROM cancion WHERE id_album = ? AND activo = TRUE", idAlbum);
     }
 
     private Integer idAlbumONull(Album album) {
