@@ -3,7 +3,7 @@ package modelo;
 import Enumeraciones.RolUsuario;
 
 import java.time.LocalDate;
-
+import Seguridad.Seguridad;
 public abstract class Usuario {
     private int idUsuario;
     private String nombre;
@@ -92,6 +92,11 @@ public abstract class Usuario {
     }
 
     // Pendiente: verificarContrasenia(String) se resolvera en el servicio de autenticacion.
+
+    public boolean verificarContrasenia(String contrasenia) {
+        return hashContrasenia.equals(Seguridad.hashear(contrasenia, salt));
+    }
+
     public abstract RolUsuario getRol();
 
     public abstract boolean puedeAdministrar();
