@@ -1,3 +1,4 @@
+
 DROP DATABASE IF EXISTS ReproductorMusicalBD;
 CREATE DATABASE ReproductorMusicalBD CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE ReproductorMusicalBD;
@@ -89,141 +90,72 @@ CREATE TABLE registro_accion (
 );
 
 
--- Usuarios: ids 1-3 administradores, 4-15 normales.
--- OJO: hash y salt son de relleno; para probar el login hay que
--- registrar los usuarios desde el programa (o generar el hash real).
+-- Usuarios: ids 1-3 administradores (uno por nivel), 4-5 normales (uno premium y uno no).
+-- Hash y salt reales, generados con la clase Seguridad (SHA-256 de salt + contrasenia):
+--   ids 1-3  (ADMIN):   admin123
+--   ids 4-5  (NORMAL):  1234
+-- Ejemplo de login: juan@mail.com / 1234  -  admin@musica.com / admin123
 INSERT INTO usuario (id_usuario, nombre, email, hash_contrasenia, salt, rol, premium, nivel_admin, fecha_registro) VALUES
-(1,  'Admin Principal',  'admin@musica.com',      'hash_demo_01', 'salt_demo_01', 'ADMIN',  NULL, 'SUPERADMIN',   '2026-01-10'),
-(2,  'Laura Editora',    'laura@musica.com',      'hash_demo_02', 'salt_demo_02', 'ADMIN',  NULL, 'EDITOR',       '2026-01-12'),
-(3,  'Tomas Revisor',    'tomas@musica.com',      'hash_demo_03', 'salt_demo_03', 'ADMIN',  NULL, 'VISUALIZANTE', '2026-01-15'),
-(4,  'Juan Perez',       'juan@mail.com',         'hash_demo_04', 'salt_demo_04', 'NORMAL', TRUE,  NULL,          '2026-02-01'),
-(5,  'Maria Gomez',      'maria@mail.com',        'hash_demo_05', 'salt_demo_05', 'NORMAL', FALSE, NULL,          '2026-02-03'),
-(6,  'Carlos Lopez',     'carlos@mail.com',       'hash_demo_06', 'salt_demo_06', 'NORMAL', TRUE,  NULL,          '2026-02-10'),
-(7,  'Ana Rodriguez',    'ana@mail.com',          'hash_demo_07', 'salt_demo_07', 'NORMAL', FALSE, NULL,          '2026-02-14'),
-(8,  'Pedro Martinez',   'pedro@mail.com',        'hash_demo_08', 'salt_demo_08', 'NORMAL', FALSE, NULL,          '2026-03-01'),
-(9,  'Lucia Fernandez',  'lucia@mail.com',        'hash_demo_09', 'salt_demo_09', 'NORMAL', TRUE,  NULL,          '2026-03-05'),
-(10, 'Diego Sanchez',    'diego@mail.com',        'hash_demo_10', 'salt_demo_10', 'NORMAL', FALSE, NULL,          '2026-03-20'),
-(11, 'Sofia Diaz',       'sofia@mail.com',        'hash_demo_11', 'salt_demo_11', 'NORMAL', TRUE,  NULL,          '2026-04-02'),
-(12, 'Martin Torres',    'martin@mail.com',       'hash_demo_12', 'salt_demo_12', 'NORMAL', FALSE, NULL,          '2026-04-11'),
-(13, 'Valentina Ruiz',   'valentina@mail.com',    'hash_demo_13', 'salt_demo_13', 'NORMAL', FALSE, NULL,          '2026-05-06'),
-(14, 'Nicolas Castro',   'nicolas@mail.com',      'hash_demo_14', 'salt_demo_14', 'NORMAL', TRUE,  NULL,          '2026-05-18'),
-(15, 'Camila Herrera',   'camila@mail.com',       'hash_demo_15', 'salt_demo_15', 'NORMAL', FALSE, NULL,          '2026-06-01');
+(1, 'Admin Principal', 'admin@musica.com', '8a6a11436199e11b847d37c4b29f5fc9bcb0503f2d15ee4bfd4d6bdc88e035fb', 'fbaedff104b9af00c13de46c161214e6', 'ADMIN',  NULL, 'SUPERADMIN',   '2026-01-10'),
+(2, 'Laura Editora',   'laura@musica.com', '5d96c27db2ef74fa6f063464efcf1b6405b182813fda8494eb14b095199f5d16', '551ddab45d389b8111137971cab1f007', 'ADMIN',  NULL, 'EDITOR',       '2026-01-12'),
+(3, 'Tomas Revisor',   'tomas@musica.com', 'a05df6d5ef7e6b2217f7adb5cd5539603d11d6ed6f6924e5b31f16d0ba7678dc', 'c4d86ef3f4e68854b64b7fda157926c0', 'ADMIN',  NULL, 'VISUALIZANTE', '2026-01-15'),
+(4, 'Juan Perez',      'juan@mail.com',    'eefb3bd4ccc1842d9ebbd78a393646a72a7a565cbe5f2b350ec7df34af1a66c6', '5689c0b45824968517ea1f152407d481', 'NORMAL', TRUE,  NULL,          '2026-02-01'),
+(5, 'Maria Gomez',     'maria@mail.com',   '71ee04af15fdd992e6bbf17593b954c8b95d85b7e8ec10d7d2b3bed7ed8d80b8', '1409d50bc1e0d1e58eaa56238b17c6d8', 'NORMAL', FALSE, NULL,          '2026-02-03');
 
 INSERT INTO artista (id_artista, nombre, pais_origen) VALUES
-(1,  'Soda Stereo',            'Argentina'),
-(2,  'Charly Garcia',          'Argentina'),
-(3,  'Divididos',              'Argentina'),
-(4,  'Fito Paez',              'Argentina'),
-(5,  'Luis Alberto Spinetta',  'Argentina'),
-(6,  'Mercedes Sosa',          'Argentina'),
-(7,  'Los Palmeras',           'Argentina'),
-(8,  'Daddy Yankee',           'Puerto Rico'),
-(9,  'Metallica',              'Estados Unidos'),
-(10, 'Miles Davis',            'Estados Unidos'),
-(11, 'Daft Punk',              'Francia'),
-(12, 'Ludwig van Beethoven',   'Alemania'),
-(13, 'Eminem',                 'Estados Unidos'),
-(14, 'Dua Lipa',               'Reino Unido'),
-(15, 'Bob Dylan',              'Estados Unidos');
+(1, 'Soda Stereo',    'Argentina'),
+(2, 'Charly Garcia',  'Argentina'),
+(3, 'Mercedes Sosa',  'Argentina'),
+(4, 'Metallica',      'Estados Unidos'),
+(5, 'Daft Punk',      'Francia');
 
 INSERT INTO artista_genero (id_artista, genero) VALUES
-(1,'ROCK'), (2,'ROCK'), (2,'POP'), (3,'ROCK'), (4,'ROCK'), (4,'POP'),
-(5,'ROCK'), (5,'JAZZ'), (6,'FOLK'), (7,'CUMBIA'), (8,'REGGAETON'),
-(9,'METAL'), (10,'JAZZ'), (11,'ELECTRONICA'), (12,'CLASICA'),
-(13,'HIP_HOP'), (14,'POP'), (15,'FOLK'), (15,'ROCK');
+(1, 'ROCK'),
+(2, 'ROCK'), (2, 'POP'),
+(3, 'FOLK'),
+(4, 'METAL'),
+(5, 'ELECTRONICA');
 
+-- Mercedes Sosa no tiene album: su cancion es un single
 INSERT INTO album (id_album, titulo, anio_lanzamiento, portada, id_artista) VALUES
-(1,  'Signos',                    1986, 'portadas/signos.jpg',        1),
-(2,  'Clics Modernos',            1983, 'portadas/clics.jpg',         2),
-(3,  'Acariciando lo aspero',     1991, 'portadas/acariciando.jpg',   3),
-(4,  'El amor despues del amor',  1992, 'portadas/amor.jpg',          4),
-(5,  'Mondo di Cromo',            1983, 'portadas/mondo.jpg',         5),
-(6,  'Cantora 1',                 2009, 'portadas/cantora.jpg',       6),
-(7,  'Lo mejor de Los Palmeras',  2005, 'portadas/palmeras.jpg',      7),
-(8,  'Barrio Fino',               2004, 'portadas/barriofino.jpg',    8),
-(9,  'Master of Puppets',         1986, 'portadas/mop.jpg',           9),
-(10, 'Kind of Blue',              1959, 'portadas/kindofblue.jpg',   10),
-(11, 'Discovery',                 2001, 'portadas/discovery.jpg',    11),
-(12, 'Sinfonia No. 9',            1824, 'portadas/sinfonia9.jpg',    12),
-(13, 'The Marshall Mathers LP',   2000, 'portadas/mmlp.jpg',         13),
-(14, 'Future Nostalgia',          2020, 'portadas/futurenostalgia.jpg', 14),
-(15, 'Highway 61 Revisited',      1965, 'portadas/highway61.jpg',    15);
+(1, 'Signos',             1986, 'portadas/signos.jpg',    1),
+(2, 'Clics Modernos',     1983, 'portadas/clics.jpg',     2),
+(3, 'Master of Puppets',  1986, 'portadas/mop.jpg',       4),
+(4, 'Discovery',          2001, 'portadas/discovery.jpg', 5);
 
 INSERT INTO cancion (id_cancion, titulo, duracion_segundos, ruta_archivo, genero, id_artista, id_album) VALUES
-(1,  'Signos',                            260, 'musica/signos.mp3',          'ROCK',        1,  1),
-(2,  'Persiana Americana',                282, 'musica/persiana.mp3',        'ROCK',        1,  1),
-(3,  'Nos siguen pegando abajo',          245, 'musica/nospegan.mp3',        'ROCK',        2,  2),
-(4,  'Spaghetti del rock',                272, 'musica/spaghetti.mp3',       'ROCK',        3,  3),
-(5,  'Ala delta',                         230, 'musica/aladelta.mp3',        'ROCK',        3,  3),
-(6,  'El amor despues del amor',          266, 'musica/amordespues.mp3',     'POP',         4,  4),
-(7,  'Un vestido y un amor',              280, 'musica/vestido.mp3',         'POP',         4,  4),
-(8,  'Mondo di cromo',                    251, 'musica/mondo.mp3',           'ROCK',        5,  5),
-(9,  'Gracias a la vida',                 255, 'musica/gracias.mp3',         'FOLK',        6,  NULL),
-(10, 'Al otro lado del rio',              221, 'musica/otrolado.mp3',        'FOLK',        6,  6),
-(11, 'Bombon asesino',                    215, 'musica/bombon.mp3',          'CUMBIA',      7,  7),
-(12, 'Gasolina',                          192, 'musica/gasolina.mp3',        'REGGAETON',   8,  8),
-(13, 'Master of Puppets',                 515, 'musica/mop.mp3',             'METAL',       9,  9),
-(14, 'Battery',                           312, 'musica/battery.mp3',         'METAL',       9,  9),
-(15, 'So What',                           562, 'musica/sowhat.mp3',          'JAZZ',        10, 10),
-(16, 'Blue in Green',                     337, 'musica/blueingreen.mp3',     'JAZZ',        10, 10),
-(17, 'One More Time',                     320, 'musica/onemoretime.mp3',     'ELECTRONICA', 11, 11),
-(18, 'Harder Better Faster Stronger',     224, 'musica/harder.mp3',          'ELECTRONICA', 11, 11),
-(19, 'Oda a la alegria',                  385, 'musica/oda.mp3',             'CLASICA',     12, 12),
-(20, 'Para Elisa',                        175, 'musica/paraelisa.mp3',       'CLASICA',     12, NULL),
-(21, 'The Real Slim Shady',               284, 'musica/slimshady.mp3',       'HIP_HOP',     13, 13),
-(22, 'Stan',                              404, 'musica/stan.mp3',            'HIP_HOP',     13, 13),
-(23, 'Dont Start Now',                    183, 'musica/dontstartnow.mp3',    'POP',         14, 14),
-(24, 'Levitating',                        203, 'musica/levitating.mp3',      'POP',         14, 14),
-(25, 'Like a Rolling Stone',              369, 'musica/rollingstone.mp3',    'FOLK',        15, 15);
+(1, 'Signos',                    260, 'musica/signos.mp3',      'ROCK',        1, 1),
+(2, 'Nos siguen pegando abajo',  245, 'musica/nospegan.mp3',    'ROCK',        2, 2),
+(3, 'Gracias a la vida',         255, 'musica/gracias.mp3',     'FOLK',        3, NULL),
+(4, 'Master of Puppets',         515, 'musica/mop.mp3',         'METAL',       4, 3),
+(5, 'One More Time',             320, 'musica/onemoretime.mp3', 'ELECTRONICA', 5, 4);
 
 INSERT INTO playlist (id_playlist, nombre, descripcion, publica, id_usuario) VALUES
-(1,  'Rock nacional',        'Clasicos del rock argentino',    TRUE,  4),
-(2,  'Para el auto',         'Temas para manejar',             FALSE, 4),
-(3,  'Estudiar',             'Musica tranquila',               FALSE, 5),
-(4,  'Fiesta',               'Para bailar',                    TRUE,  5),
-(5,  'Folklore',             'Lo mejor del folklore',          TRUE,  6),
-(6,  'Metal pesado',         'Riffs y mas riffs',              FALSE, 7),
-(7,  'Jazz de noche',        'Jazz para la noche',             TRUE,  8),
-(8,  'Electronica',          'Beats electronicos',             TRUE,  9),
-(9,  'Clasica',              'Musica clasica',                 FALSE, 10),
-(10, 'Hip hop',              'Rimas y bases',                  TRUE,  11),
-(11, 'Pop actual',           'Exitos del pop',                 TRUE,  12),
-(12, 'Reggaeton',            'Perreo intenso',                 FALSE, 13),
-(13, 'Cumbia',               'Cumbia para el finde',           TRUE,  14),
-(14, 'Mix variado',          'De todo un poco',                FALSE, 15),
-(15, 'Favoritas del verano', 'Para la playa',                  TRUE,  6);
+(1, 'Rock nacional', 'Clasicos del rock argentino', TRUE,  4),
+(2, 'Para el auto',  'Temas para manejar',          FALSE, 4),
+(3, 'Folklore',      'Lo mejor del folklore',       TRUE,  5),
+(4, 'Mix variado',   'De todo un poco',             FALSE, 5),
+(5, 'Favoritas',     'Mis temas preferidos',        TRUE,  4);
 
 INSERT INTO playlist_cancion (id_playlist, id_cancion, posicion) VALUES
-(1, 1, 0),  (1, 2, 1),  (1, 3, 2),  (1, 4, 3),
-(2, 5, 0),  (2, 6, 1),  (2, 12, 2),
-(3, 15, 0), (3, 16, 1), (3, 20, 2),
-(4, 12, 0), (4, 17, 1), (4, 24, 2),
-(5, 9, 0),  (5, 10, 1),
-(6, 13, 0), (6, 14, 1),
-(7, 15, 0), (7, 16, 1),
-(8, 17, 0), (8, 18, 1),
-(9, 19, 0), (9, 20, 1),
-(10, 21, 0),(10, 22, 1),
-(11, 23, 0),(11, 24, 1),(11, 7, 2),
-(12, 12, 0),(12, 17, 1),
-(13, 11, 0),(13, 12, 1),(13, 24, 2),
-(14, 25, 0),(14, 8, 1), (14, 21, 2),
-(15, 24, 0),(15, 11, 1),(15, 12, 2);
+(1, 1, 0), (1, 2, 1),
+(2, 5, 0), (2, 4, 1),
+(3, 3, 0),
+(4, 1, 0), (4, 3, 1), (4, 5, 2),
+(5, 2, 0), (5, 3, 1), (5, 4, 2);
 
 INSERT INTO favorito (id_usuario, id_cancion, fecha_agregado) VALUES
-(4, 1, '2026-02-05'),  (4, 2, '2026-02-05'),  (4, 13, '2026-02-10'),
-(5, 24, '2026-02-20'), (5, 23, '2026-02-20'),
-(6, 9, '2026-03-01'),  (6, 10, '2026-03-01'),
-(7, 13, '2026-03-15'), (7, 14, '2026-03-15'),
-(8, 15, '2026-04-02'), (9, 17, '2026-04-10'),
-(10, 19, '2026-04-12'),(11, 21, '2026-05-01'),
-(12, 24, '2026-05-02'),(13, 12, '2026-05-20');
+(4, 1, '2026-02-05'), (4, 4, '2026-02-10'),
+(5, 3, '2026-02-20'), (5, 5, '2026-02-20');
 
 INSERT INTO registro_accion (id_admin, fecha_hora, accion) VALUES
 (1, '2026-01-10 10:00:00', 'Alta de artista: Soda Stereo'),
-(1, '2026-01-10 10:05:00', 'Alta de album: Signos'),
-(2, '2026-01-12 11:30:00', 'Alta de cancion: Persiana Americana'),
-(2, '2026-01-13 09:15:00', 'Modificacion de cancion: Spaghetti del rock'),
-(1, '2026-01-14 16:45:00', 'Cambio de nivel de admin: Tomas Revisor'),
-(3, '2026-01-15 12:00:00', 'Consulta de listado de usuarios');
+(2, '2026-01-12 11:30:00', 'Alta de cancion: Signos'),
+(1, '2026-01-14 16:45:00', 'Cambio de nivel de admin: Tomas Revisor');
 
+
+SELECT 'usuario' AS tabla, COUNT(*) AS filas FROM usuario
+UNION ALL SELECT 'artista',  COUNT(*) FROM artista
+UNION ALL SELECT 'album',    COUNT(*) FROM album
+UNION ALL SELECT 'cancion',  COUNT(*) FROM cancion
+UNION ALL SELECT 'playlist', COUNT(*) FROM playlist;
