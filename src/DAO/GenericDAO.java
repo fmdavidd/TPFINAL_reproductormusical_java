@@ -25,8 +25,16 @@ public abstract class GenericDAO<T> implements IGenericDAO<T> {
 
     @Override
     public boolean darDeBaja(int id) throws ConexionBDException {
-        String sql = "UPDATE " + getNombreTabla() + " SET activo = FALSE WHERE " + getNombreColumnaId() + " = ?";
-        return ejecutarUpdate(sql, id) > 0;
+        return cambiarActivo(id, false);
+    }
+
+    public boolean darDeAlta(int id) throws ConexionBDException {
+        return cambiarActivo(id, true);
+    }
+
+    private boolean cambiarActivo(int id, boolean valor) throws ConexionBDException {
+        String sql = "UPDATE " + getNombreTabla() + " SET activo = ? WHERE " + getNombreColumnaId() + " = ?";
+        return ejecutarUpdate(sql, valor, id) > 0;
     }
 
     @Override
@@ -39,6 +47,10 @@ public abstract class GenericDAO<T> implements IGenericDAO<T> {
     @Override
     public List<T> listarActivos() throws ConexionBDException {
         return consultar("SELECT * FROM " + getNombreTabla() + " WHERE activo = TRUE");
+    }
+
+    public List<T> listarTodos() throws ConexionBDException {
+        return consultar("SELECT * FROM " + getNombreTabla());
     }
 
 

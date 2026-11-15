@@ -61,7 +61,6 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
                 idPlaylist, idCancion);
     }
 
-    /** Canciones activas de la playlist, ordenadas por posicion. */
     private List<Cancion> cargarCanciones(int idPlaylist) throws ConexionBDException {
         List<Cancion> canciones = new ArrayList<>();
         String sql = "SELECT c.* FROM cancion c "
