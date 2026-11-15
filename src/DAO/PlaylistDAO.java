@@ -46,12 +46,6 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
                 p.getNombre(), p.getDescripcion(), p.isPublica(), p.getIdPlaylist()) > 0;
     }
 
-    /** Playlists activas de un usuario. */
-    public List<Playlist> listarPorUsuario(int idUsuario) throws ConexionBDException {
-        return consultar("SELECT * FROM playlist WHERE id_usuario = ? AND activo = TRUE", idUsuario);
-    }
-
-    /** Agrega una cancion en la posicion indicada (orden de la List). */
     public void agregarCancion(int idPlaylist, int idCancion, int posicion) throws ConexionBDException {
         ejecutarUpdate(
                 "INSERT INTO playlist_cancion (id_playlist, id_cancion, posicion) VALUES (?, ?, ?)",
@@ -59,6 +53,10 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
     }
 
     public void quitarCancion(int idPlaylist, int idCancion) throws ConexionBDException {
+        ejecutarUpdate("UPDATE playlist_cancion SET posicion = posicion - 1 WHERE id_playlist = ? AND posicion > "
+                        + "(SELECT posicion FROM (SELECT posicion FROM playlist_cancion "
+                        + "WHERE id_playlist = ? AND id_cancion = ?) AS actual)",
+                idPlaylist, idPlaylist, idCancion);
         ejecutarUpdate("DELETE FROM playlist_cancion WHERE id_playlist = ? AND id_cancion = ?",
                 idPlaylist, idCancion);
     }

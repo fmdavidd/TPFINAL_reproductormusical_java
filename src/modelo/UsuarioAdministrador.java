@@ -12,7 +12,8 @@ import java.util.TreeMap;
 
 public class UsuarioAdministrador extends Usuario {
     private NivelAdmin nivelAdmin;
-    private TreeMap<LocalDateTime, String> registroAcciones;
+
+    private TreeMap<LocalDateTime, String> registroAcciones = new TreeMap<>();
 
     public UsuarioAdministrador(){
         super();
@@ -43,7 +44,7 @@ public class UsuarioAdministrador extends Usuario {
     }
 
     public void setRegistroAcciones(TreeMap<LocalDateTime, String> registroAcciones) {
-        this.registroAcciones = new TreeMap<LocalDateTime, String>(registroAcciones);
+        this.registroAcciones = new TreeMap<>(registroAcciones);
     }
 
     public void registrarAccion(String accion) {
