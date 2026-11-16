@@ -54,6 +54,29 @@ public class AlbumService {
     }
 
 
+    public List<Album> listarInactivos() throws ConexionBDException {
+        return albumDAO.listarInactivos();
+    }
+
+    public void reactivar(int id)
+            throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException {
+        if (albumes.containsKey(id)) {
+            throw new ElementoDuplicadoException("El album " + id + " ya esta activo");
+        }
+        Album a = albumDAO.buscarPorId(id);
+        if (a == null) {
+            throw new ElementoNoEncontradoException("No existe el album con id " + id);
+        }
+        if (!a.getArtista().isActivo()) {
+            throw new ElementoNoEncontradoException("El artista del album esta dado de baja: reactivalo primero");
+        }
+        validarDuplicado(a);
+        albumDAO.darDeAlta(id);
+        a.setActivo(true);
+        albumes.put(id, a);
+    }
+
+
     public Album buscarPorId(int id) throws ElementoNoEncontradoException {
         Album a = albumes.get(id);
         if (a == null) {

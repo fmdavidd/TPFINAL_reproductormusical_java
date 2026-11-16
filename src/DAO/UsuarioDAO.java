@@ -1,10 +1,13 @@
 package DAO;
 import Conexion.ConexionBD;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -33,45 +36,101 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
     @Override
     public int insertar(Usuario u) throws ConexionBDException {
         LocalDate fecha = u.getFechaRegistro() != null ? u.getFechaRegistro() : LocalDate.now();
-        return ejecutarInsert(
-                "INSERT INTO usuario (nombre, email, hash_contrasenia, salt, rol, premium, nivel_admin, fecha_registro) "
-                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                u.getNombre(), u.getEmail(), u.getHashContrasenia(), u.getSalt(), u.getRol().name(),
-                premiumONull(u), nivelAdminONull(u), java.sql.Date.valueOf(fecha));
+        String sql = "INSERT INTO usuario (nombre, email, hash_contrasenia, salt, rol, premium, nivel_admin, fecha_registro) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection con = ConexionBD.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, u.getNombre());
+            ps.setString(2, u.getEmail());
+            ps.setString(3, u.getHashContrasenia());
+            ps.setString(4, u.getSalt());
+            ps.setString(5, u.getRol().name());
+            asignarPremiumYNivel(ps, 6, u);
+            ps.setDate(8, java.sql.Date.valueOf(fecha));
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                return keys.next() ? keys.getInt(1) : -1;
+            }
+        } catch (SQLException e) {
+            throw new ConexionBDException("Error al insertar usuario - " + e.getMessage());
+        }
     }
 
     @Override
     public boolean modificar(Usuario u) throws ConexionBDException {
-        return ejecutarUpdate(
-                "UPDATE usuario SET nombre = ?, email = ?, hash_contrasenia = ?, salt = ?, "
-                        + "premium = ?, nivel_admin = ? WHERE id_usuario = ?",
-                u.getNombre(), u.getEmail(), u.getHashContrasenia(), u.getSalt(),
-                premiumONull(u), nivelAdminONull(u), u.getIdUsuario()) > 0;
+        String sql = "UPDATE usuario SET nombre = ?, email = ?, hash_contrasenia = ?, salt = ?, "
+                + "premium = ?, nivel_admin = ? WHERE id_usuario = ?";
+        try (Connection con = ConexionBD.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, u.getNombre());
+            ps.setString(2, u.getEmail());
+            ps.setString(3, u.getHashContrasenia());
+            ps.setString(4, u.getSalt());
+            asignarPremiumYNivel(ps, 5, u);
+            ps.setInt(7, u.getIdUsuario());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new ConexionBDException("Error al modificar usuario - " + e.getMessage());
+        }
     }
 
     public boolean agregarFavorito(int idUsuario, int idCancion) throws ConexionBDException {
         if (existeFavorito(idUsuario, idCancion)) {
             return false;
         }
-        return ejecutarUpdate(
-                "INSERT INTO favorito (id_usuario, id_cancion, fecha_agregado) VALUES (?, ?, ?)",
-                idUsuario, idCancion, java.sql.Date.valueOf(LocalDate.now())) > 0;
+        String sql = "INSERT INTO favorito (id_usuario, id_cancion, fecha_agregado) VALUES (?, ?, ?)";
+        try (Connection con = ConexionBD.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idUsuario);
+            ps.setInt(2, idCancion);
+            ps.setDate(3, java.sql.Date.valueOf(LocalDate.now()));
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new ConexionBDException("Error al agregar favorito - " + e.getMessage());
+        }
     }
 
     public boolean quitarFavorito(int idUsuario, int idCancion) throws ConexionBDException {
-        return ejecutarUpdate("DELETE FROM favorito WHERE id_usuario = ? AND id_cancion = ?",
-                idUsuario, idCancion) > 0;
+        String sql = "DELETE FROM favorito WHERE id_usuario = ? AND id_cancion = ?";
+        try (Connection con = ConexionBD.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idUsuario);
+            ps.setInt(2, idCancion);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new ConexionBDException("Error al quitar favorito - " + e.getMessage());
+        }
     }
 
     public void registrarAccion(int idAdmin, String accion) throws ConexionBDException {
-        ejecutarUpdate("INSERT INTO registro_accion (id_admin, fecha_hora, accion) VALUES (?, ?, ?)",
-                idAdmin, Timestamp.valueOf(LocalDateTime.now()), accion);
+        String sql = "INSERT INTO registro_accion (id_admin, fecha_hora, accion) VALUES (?, ?, ?)";
+        try (Connection con = ConexionBD.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idAdmin);
+            ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setString(3, accion);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new ConexionBDException("Error al registrar accion - " + e.getMessage());
+        }
+    }
+
+    // Completa los parametros premium y nivel_admin (posicion y posicion + 1).
+    // Un usuario normal tiene premium y nivel NULL; un administrador, al reves.
+    private void asignarPremiumYNivel(PreparedStatement ps, int posicion, Usuario u) throws SQLException {
+        if (u instanceof UsuarioNormal) {
+            ps.setBoolean(posicion, ((UsuarioNormal) u).esPremium());
+            ps.setNull(posicion + 1, Types.VARCHAR);
+        } else {
+            ps.setNull(posicion, Types.BOOLEAN);
+            ps.setString(posicion + 1, ((UsuarioAdministrador) u).getNivelAdmin().name());
+        }
     }
 
 
     private boolean existeFavorito(int idUsuario, int idCancion) throws ConexionBDException {
         String sql = "SELECT 1 FROM favorito WHERE id_usuario = ? AND id_cancion = ?";
-        try (java.sql.Connection con = ConexionBD.getConnection();
+        try (Connection con = ConexionBD.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, idUsuario);
             ps.setInt(2, idCancion);
@@ -86,7 +145,7 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
     private Set<Integer> cargarFavoritos(int idUsuario) throws ConexionBDException {
         Set<Integer> ids = new HashSet<>();
         String sql = "SELECT id_cancion FROM favorito WHERE id_usuario = ?";
-        try (java.sql.Connection con = ConexionBD.getConnection();
+        try (Connection con = ConexionBD.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, idUsuario);
             try (ResultSet rs = ps.executeQuery()) {
@@ -102,7 +161,7 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
 
     private void cargarRegistroAcciones(UsuarioAdministrador admin) throws ConexionBDException {
         String sql = "SELECT fecha_hora, accion FROM registro_accion WHERE id_admin = ?";
-        try (java.sql.Connection con = ConexionBD.getConnection();
+        try (Connection con = ConexionBD.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, admin.getIdUsuario());
             TreeMap<LocalDateTime, String> registro = new TreeMap<>();
@@ -115,15 +174,6 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
         } catch (SQLException e) {
             throw new ConexionBDException("Error al cargar acciones del admin " + admin.getIdUsuario() + " - " + e.getMessage());
         }
-    }
-
-    private Boolean premiumONull(Usuario u) {
-        return (u instanceof UsuarioNormal) ? ((UsuarioNormal) u).esPremium() : null;
-    }
-
-    private String nivelAdminONull(Usuario u) {
-        return (u instanceof UsuarioAdministrador)
-                ? ((UsuarioAdministrador) u).getNivelAdmin().name() : null;
     }
 
     @Override
@@ -156,4 +206,4 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
         }
         return u;
     }
-}
+}

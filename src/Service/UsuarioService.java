@@ -49,6 +49,27 @@ public class UsuarioService {
         usuarios.remove(u);
     }
 
+    public List<Usuario> listarInactivos() throws ConexionBDException {
+        return usuarioDAO.listarInactivos();
+    }
+
+    public void reactivar(int id)
+            throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException {
+        for (Usuario activo : usuarios) {
+            if (activo.getIdUsuario() == id) {
+                throw new ElementoDuplicadoException("El usuario " + id + " ya esta activo");
+            }
+        }
+        Usuario u = usuarioDAO.buscarPorId(id);
+        if (u == null) {
+            throw new ElementoNoEncontradoException("No existe el usuario con id " + id);
+        }
+        validarEmail(u);
+        usuarioDAO.darDeAlta(id);
+        u.setActivo(true);
+        usuarios.add(u);
+    }
+
     public void cambiarNivelAdmin(int idUsuario, NivelAdmin nuevoNivel)
             throws ConexionBDException, ElementoNoEncontradoException {
         Usuario u = buscarPorId(idUsuario);

@@ -52,6 +52,26 @@ public class ArtistaService {
     }
 
 
+    public List<Artista> listarInactivos() throws ConexionBDException {
+        return artistaDAO.listarInactivos();
+    }
+
+    public void reactivar(int id)
+            throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException {
+        if (artistas.containsKey(id)) {
+            throw new ElementoDuplicadoException("El artista " + id + " ya esta activo");
+        }
+        Artista a = artistaDAO.buscarPorId(id);
+        if (a == null) {
+            throw new ElementoNoEncontradoException("No existe el artista con id " + id);
+        }
+        validarDuplicado(a);
+        artistaDAO.darDeAlta(id);
+        a.setActivo(true);
+        artistas.put(id, a);
+    }
+
+
     public Artista buscarPorId(int id) throws ElementoNoEncontradoException {
         Artista a = artistas.get(id);
         if (a == null) {

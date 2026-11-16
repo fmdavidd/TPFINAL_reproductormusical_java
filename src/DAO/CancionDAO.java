@@ -1,11 +1,16 @@
 package DAO;
 
+import Conexion.ConexionBD;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 
 import Enumeraciones.Genero;
 import Excepciones.ConexionBDException;
-import modelo.Album;
 import modelo.Cancion;
 
 public class CancionDAO extends GenericDAO<Cancion> {
@@ -25,24 +30,50 @@ public class CancionDAO extends GenericDAO<Cancion> {
 
     @Override
     public int insertar(Cancion c) throws ConexionBDException {
-        return ejecutarInsert(
-                "INSERT INTO cancion (titulo, duracion_segundos, ruta_archivo, genero, id_artista, id_album) "
-                        + "VALUES (?, ?, ?, ?, ?, ?)",
-                c.getTitulo(), c.getDuracionSegundos(), c.getRutaArchivo(), c.getGenero().name(),
-                c.getArtista().getIdArtista(), idAlbumONull(c.getAlbum()));
+        String sql = "INSERT INTO cancion (titulo, duracion_segundos, ruta_archivo, genero, id_artista, id_album) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection con = ConexionBD.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, c.getTitulo());
+            ps.setInt(2, c.getDuracionSegundos());
+            ps.setString(3, c.getRutaArchivo());
+            ps.setString(4, c.getGenero().name());
+            ps.setInt(5, c.getArtista().getIdArtista());
+            if (c.getAlbum() == null) {
+                ps.setNull(6, Types.INTEGER); // single
+            } else {
+                ps.setInt(6, c.getAlbum().getIdAlbum());
+            }
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                return keys.next() ? keys.getInt(1) : -1;
+            }
+        } catch (SQLException e) {
+            throw new ConexionBDException("Error al insertar cancion - " + e.getMessage());
+        }
     }
 
     @Override
     public boolean modificar(Cancion c) throws ConexionBDException {
-        return ejecutarUpdate(
-                "UPDATE cancion SET titulo = ?, duracion_segundos = ?, ruta_archivo = ?, genero = ?, "
-                        + "id_artista = ?, id_album = ? WHERE id_cancion = ?",
-                c.getTitulo(), c.getDuracionSegundos(), c.getRutaArchivo(), c.getGenero().name(),
-                c.getArtista().getIdArtista(), idAlbumONull(c.getAlbum()), c.getIdCancion()) > 0;
-    }
-
-    private Integer idAlbumONull(Album album) {
-        return album == null ? null : album.getIdAlbum();
+        String sql = "UPDATE cancion SET titulo = ?, duracion_segundos = ?, ruta_archivo = ?, genero = ?, "
+                + "id_artista = ?, id_album = ? WHERE id_cancion = ?";
+        try (Connection con = ConexionBD.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, c.getTitulo());
+            ps.setInt(2, c.getDuracionSegundos());
+            ps.setString(3, c.getRutaArchivo());
+            ps.setString(4, c.getGenero().name());
+            ps.setInt(5, c.getArtista().getIdArtista());
+            if (c.getAlbum() == null) {
+                ps.setNull(6, Types.INTEGER);
+            } else {
+                ps.setInt(6, c.getAlbum().getIdAlbum());
+            }
+            ps.setInt(7, c.getIdCancion());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new ConexionBDException("Error al modificar cancion - " + e.getMessage());
+        }
     }
 
     @Override

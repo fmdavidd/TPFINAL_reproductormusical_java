@@ -55,6 +55,25 @@ public class PlaylistService {
         playlists.remove(id);
     }
 
+    public List<Playlist> listarInactivos() throws ConexionBDException {
+        return playlistDAO.listarInactivos();
+    }
+
+    public void reactivar(int id)
+            throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException {
+        if (playlists.containsKey(id)) {
+            throw new ElementoDuplicadoException("La playlist " + id + " ya esta activa");
+        }
+        Playlist p = playlistDAO.buscarPorId(id);
+        if (p == null) {
+            throw new ElementoNoEncontradoException("No existe la playlist con id " + id);
+        }
+        validarDuplicado(p);
+        playlistDAO.darDeAlta(id);
+        p.setActivo(true);
+        playlists.put(id, p);
+    }
+
     public void agregarCancion(int idPlaylist, int idCancion)
             throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException {
         Playlist p = buscarPorId(idPlaylist);

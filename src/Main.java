@@ -147,6 +147,8 @@ public class Main {
         System.out.println("3. Alta");
         System.out.println("4. Modificar");
         System.out.println("5. Baja");
+        System.out.println("8. Ver dados de baja (admin)");
+        System.out.println("9. Reactivar (admin)");
         System.out.println("0. Volver");
 
         if (tipo == 4) {
@@ -160,7 +162,7 @@ public class Main {
             return;
         }
 
-        if (opcion < 1 || opcion > 7) {
+        if (opcion < 1 || opcion > 9) {
             System.out.println("Opcion invalida.");
             return;
         }
@@ -168,7 +170,7 @@ public class Main {
         // Como las playlists son las únicas que tienen opciones mayores a 5,
         // si el tipo no es una playlist una opción mayor a 5 no puede ser
         // válida
-        if (tipo != 4 && opcion > 5) {
+        if (tipo != 4 && (opcion == 6 || opcion == 7)) {
             System.out.println("Opcion invalida.");
             return;
         }
@@ -178,10 +180,15 @@ public class Main {
             exigirAdmin();
         }
 
+        // Ver dados de baja y reactivar son siempre de administrador (tambien en playlists).
+        if (opcion == 8 || opcion == 9) {
+            exigirAdmin();
+        }
+
         int id = 0;
 
         // Para consultar, modificar o dar de baja se pide el ID.
-        if (opcion != 1 && opcion != 3) {
+        if (opcion != 1 && opcion != 3 && opcion != 8) {
             id = numero("ID");
 
             if (id <= 0) {
@@ -191,7 +198,7 @@ public class Main {
 
         // Una playlist privada solo puede consultarla su duenio o un administrador.
         // Para modificarla, tambien se necesita permiso aunque sea publica.
-        if (tipo == 4 && id != 0) {
+        if (tipo == 4 && id != 0 && opcion != 9) {
             Playlist playlist = playlists.buscarPorId(id);
             Usuario usuarioActual = sesion.getUsuarioActual();
 
@@ -260,6 +267,37 @@ public class Main {
                 System.out.println("Baja realizada.");
                 break;
             }
+            case 8: {
+                listarInactivos(tipo);
+                break;
+            }
+            case 9: {
+                switch (tipo) {
+                    case 1: {
+                        canciones.reactivar(id);
+                        break;
+                    }
+                    case 2: {
+                        artistas.reactivar(id);
+                        break;
+                    }
+                    case 3: {
+                        albumes.reactivar(id);
+                        break;
+                    }
+                    case 4: {
+                        playlists.reactivar(id);
+                        break;
+                    }
+                    case 5: {
+                        usuarios.reactivar(id);
+                        break;
+                    }
+                }
+
+                System.out.println("Reactivado.");
+                break;
+            }
             case 6: {
                 int idCancion = numero("ID de cancion");
                 playlists.agregarCancion(id, idCancion);
@@ -270,6 +308,41 @@ public class Main {
                 int idCancion = numero("ID de cancion");
                 playlists.quitarCancion(id, idCancion);
                 System.out.println("Cancion quitada.");
+                break;
+            }
+        }
+    }
+
+    private static void listarInactivos(int tipo) throws Exception {
+        switch (tipo) {
+            case 1: {
+                for (Cancion cancion : canciones.listarInactivos()) {
+                    System.out.println(cancion.getIdCancion() + " - " + cancion.getTitulo());
+                }
+                break;
+            }
+            case 2: {
+                for (Artista artista : artistas.listarInactivos()) {
+                    System.out.println(artista.getIdArtista() + " - " + artista.getNombre());
+                }
+                break;
+            }
+            case 3: {
+                for (Album album : albumes.listarInactivos()) {
+                    System.out.println(album.getIdAlbum() + " - " + album.getTitulo());
+                }
+                break;
+            }
+            case 4: {
+                for (Playlist playlist : playlists.listarInactivos()) {
+                    System.out.println(playlist.getIdPlaylist() + " - " + playlist.getNombre());
+                }
+                break;
+            }
+            case 5: {
+                for (Usuario usuario : usuarios.listarInactivos()) {
+                    System.out.println(usuario);
+                }
                 break;
             }
         }

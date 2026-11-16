@@ -52,6 +52,33 @@ public class CancionService {
     }
 
 
+    // Lista las canciones dadas de baja (activo = FALSE) para poder elegir cual reactivar.
+    public List<Cancion> listarInactivos() throws ConexionBDException {
+        return cancionDAO.listarInactivos();
+    }
+
+    public void reactivar(int id)
+            throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException {
+        if (canciones.containsKey(id)) {
+            throw new ElementoDuplicadoException("La cancion " + id + " ya esta activa");
+        }
+        Cancion c = cancionDAO.buscarPorId(id);
+        if (c == null) {
+            throw new ElementoNoEncontradoException("No existe la cancion con id " + id);
+        }
+        if (!c.getArtista().isActivo()) {
+            throw new ElementoNoEncontradoException("El artista de la cancion esta dado de baja: reactivalo primero");
+        }
+        if (c.getAlbum() != null && !c.getAlbum().isActivo()) {
+            throw new ElementoNoEncontradoException("El album de la cancion esta dado de baja: reactivalo primero");
+        }
+        validarDuplicado(c);
+        cancionDAO.darDeAlta(id);
+        c.setActivo(true);
+        canciones.put(id, c);
+    }
+
+
     public Cancion buscarPorId(int id) throws ElementoNoEncontradoException {
         Cancion c = canciones.get(id);
         if (c == null) {
