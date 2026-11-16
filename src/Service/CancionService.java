@@ -1,98 +1,83 @@
 package Service;
 
+import DAO.*;
+import Excepciones.*;
+import modelo.*;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-
-import DAO.CancionDAO;
-import Enumeraciones.Genero;
-import Excepciones.ConexionBDException;
-import Excepciones.ElementoDuplicadoException;
-import Excepciones.ElementoNoEncontradoException;
-import modelo.Cancion;
 
 public class CancionService {
+    private final CancionDAO dao = new CancionDAO();
+    private final SesionService sesion;
+    public CancionService() throws ConexionBDException { this((SesionService) null); }
+    public CancionService(SesionService sesion) { this.sesion = sesion; }
 
-    private CancionDAO cancionDAO = new CancionDAO();
-
-    private Map<Integer, Cancion> canciones = new LinkedHashMap<>();
-
-    public CancionService() throws ConexionBDException {
-        for (Cancion c : cancionDAO.listarActivos()) {
-            canciones.put(c.getIdCancion(), c);
-        }
+    public void alta(Cancion a) throws ConexionBDException, ElementoDuplicadoException, PermisoDenegadoException {
+        Acceso.administrador(sesion, false);
+        if (a == null || a.getIdCancion() != 0) throw new IllegalArgumentException("Un alta no debe tener ID asignado.");
+        validar(a);
+        int id = dao.insertar(a);
+        if (id <= 0) throw new ConexionBDException("No se pudo crear cancion.");
+        a.setIdCancion(id);
     }
 
-
-    public void alta(Cancion c) throws ConexionBDException, ElementoDuplicadoException {
-        validarDuplicado(c);
-        int id = cancionDAO.insertar(c);
-        if (id <= 0) {
-            throw new ConexionBDException("No se pudo dar de alta la cancion");
-        }
-        c.setIdCancion(id);
-        canciones.put(id, c);
+    public void modificar(Cancion a) throws ConexionBDException, ElementoDuplicadoException, ElementoNoEncontradoException, PermisoDenegadoException {
+        Acceso.administrador(sesion, false);
+        if (a == null) throw new IllegalArgumentException("Entidad requerida.");
+        buscarPorId(a.getIdCancion());
+        validar(a);
+        Acceso.resultado(dao.modificar(a));
     }
 
-    public void modificar(Cancion c)
-            throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException {
-        buscarPorId(c.getIdCancion());
-        validarDuplicado(c);
-        if (!cancionDAO.modificar(c)) {
-            throw new ElementoNoEncontradoException("La cancion " + c.getIdCancion() + " no existe en la base");
-        }
-        canciones.put(c.getIdCancion(), c);
-    }
-
-    public void baja(int id) throws ConexionBDException, ElementoNoEncontradoException {
+    public void baja(int id) throws ConexionBDException, ElementoNoEncontradoException, PermisoDenegadoException {
+        Acceso.administrador(sesion, false);
         buscarPorId(id);
-        cancionDAO.darDeBaja(id);
-        canciones.remove(id);
-    }
-
-
-    public Cancion buscarPorId(int id) throws ElementoNoEncontradoException {
-        Cancion c = canciones.get(id);
-        if (c == null) {
-            throw new ElementoNoEncontradoException("No existe la cancion con id " + id);
+        Acceso.resultado(dao.darDeBaja(id));
+        try { new PlaylistDAO().limpiarCancionInactiva(id); }
+        catch (ConexionBDException e) {
+            throw new ConexionBDException("La cancion se dio de baja, pero quedo pendiente normalizar playlists. " + e.getMessage());
         }
-        return c;
     }
 
-    public List<Cancion> listar() {
-        return new ArrayList<>(canciones.values());
+    public Cancion buscarPorId(int id) throws ConexionBDException, ElementoNoEncontradoException, PermisoDenegadoException {
+        Acceso.autenticado(sesion);
+        Cancion a = id <= 0 ? null : dao.buscarPorId(id);
+        if (a == null || !a.isActivo() || a.getArtista() == null || !a.getArtista().isActivo()
+                || (a.getAlbum() != null && (!a.getAlbum().isActivo() || a.getAlbum().getArtista().getIdArtista() != a.getArtista().getIdArtista()))) throw new ElementoNoEncontradoException("No existe cancion activo con id " + id);
+        return a;
     }
 
-    public List<Cancion> buscarPorTitulo(String texto) {
+    public List<Cancion> listar() throws ConexionBDException, PermisoDenegadoException {
+        Acceso.autenticado(sesion);
+        return dao.listarActivos();
+    }
+
+    private void validar(Cancion a) throws ConexionBDException, ElementoDuplicadoException {
+        if (a == null || !a.isActivo()) throw new IllegalArgumentException("Se requiere una entidad activa.");
+        Acceso.texto(a.getTitulo(), 100, "Nombre o titulo");
+
+        Artista artista = new ArtistaDAO().buscarPorId(a.getArtista() == null ? 0 : a.getArtista().getIdArtista());
+        if (artista == null || !artista.isActivo()) throw new IllegalArgumentException("El artista debe existir y estar activo.");
+        if (a.getDuracionSegundos() <= 0 || a.getGenero() == null) throw new IllegalArgumentException("Duracion y genero invalidos.");
+        if (a.getRutaArchivo() != null && a.getRutaArchivo().length() > 255) throw new IllegalArgumentException("Ruta demasiado larga.");
+        if (a.getAlbum() != null) {
+            Album album = new AlbumDAO().buscarPorId(a.getAlbum().getIdAlbum());
+            if (album == null || !album.isActivo() || album.getArtista().getIdArtista() != artista.getIdArtista())
+                throw new IllegalArgumentException("El album debe estar activo y pertenecer al artista.");
+        }
+        for (Cancion otro : dao.listarActivos()) {
+            if (otro.getIdCancion() != a.getIdCancion() && otro.getTitulo().trim().equalsIgnoreCase(a.getTitulo().trim()) && otro.getArtista().getIdArtista() == a.getArtista().getIdArtista())
+                throw new ElementoDuplicadoException("Ya existe cancion con ese nombre.");
+        }
+    }
+    public List<Cancion> buscarPorTitulo(String texto) throws ConexionBDException, PermisoDenegadoException {
         List<Cancion> resultado = new ArrayList<>();
-        for (Cancion c : canciones.values()) {
-            if (c.getTitulo().toLowerCase().contains(texto.toLowerCase())) {
-                resultado.add(c);
-            }
-        }
+        for (Cancion c : listar()) if (c.getTitulo().toLowerCase().contains(texto.toLowerCase())) resultado.add(c);
         return resultado;
     }
-
-    public List<Cancion> buscarPorGenero(Genero genero) {
+    public List<Cancion> buscarPorGenero(Enumeraciones.Genero genero) throws ConexionBDException, PermisoDenegadoException {
         List<Cancion> resultado = new ArrayList<>();
-        for (Cancion c : canciones.values()) {
-            if (c.getGenero() == genero) {
-                resultado.add(c);
-            }
-        }
+        for (Cancion c : listar()) if (c.getGenero() == genero) resultado.add(c);
         return resultado;
-    }
-
-
-    private void validarDuplicado(Cancion c) throws ElementoDuplicadoException {
-        for (Cancion otra : canciones.values()) {
-            if (otra.getIdCancion() != c.getIdCancion()
-                    && otra.getTitulo().equalsIgnoreCase(c.getTitulo())
-                    && otra.getArtista().getIdArtista() == c.getArtista().getIdArtista()) {
-                throw new ElementoDuplicadoException(
-                        "Ya existe la cancion '" + c.getTitulo() + "' de ese artista");
-            }
-        }
     }
 }

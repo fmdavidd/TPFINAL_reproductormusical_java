@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class UsuarioNormal extends Usuario {
     private boolean premium;
-    private Set<Integer> favoritos;
+    private Set<Integer> favoritos = new HashSet<Integer>();
     private List<Playlist> playlists = new ArrayList<Playlist>();
 
     public UsuarioNormal(){
@@ -42,7 +42,7 @@ public class UsuarioNormal extends Usuario {
     }
 
     public void setFavoritos(Set<Integer> favoritos) {
-        this.favoritos = new HashSet<Integer>(favoritos);
+        this.favoritos = favoritos == null ? new HashSet<Integer>() : new HashSet<Integer>(favoritos);
     }
 
     public boolean agregarFavorito(int idCancion) {

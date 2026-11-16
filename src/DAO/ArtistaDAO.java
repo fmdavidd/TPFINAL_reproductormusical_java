@@ -41,6 +41,7 @@ public class ArtistaDAO extends GenericDAO<Artista> {
         boolean ok = ejecutarUpdate(
                 "UPDATE artista SET nombre = ?, pais_origen = ? WHERE id_artista = ?",
                 a.getNombre(), a.getPaisOrigen(), a.getIdArtista()) > 0;
+        if (!ok) return false;
         // Se regeneran los generos del artista (tabla intermedia, no es baja logica)
         ejecutarUpdate("DELETE FROM artista_genero WHERE id_artista = ?", a.getIdArtista());
         if (a.getGeneros() != null) {

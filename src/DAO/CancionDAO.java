@@ -41,6 +41,20 @@ public class CancionDAO extends GenericDAO<Cancion> {
                 c.getArtista().getIdArtista(), idAlbumONull(c.getAlbum()), c.getIdCancion()) > 0;
     }
 
+    @Override
+    public java.util.List<Cancion> listarActivos() throws ConexionBDException {
+        return consultar("SELECT c.* FROM cancion c JOIN artista ar ON ar.id_artista = c.id_artista "
+                + "LEFT JOIN album al ON al.id_album = c.id_album WHERE c.activo = TRUE AND ar.activo = TRUE "
+                + "AND (c.id_album IS NULL OR (al.activo = TRUE AND al.id_artista = c.id_artista))");
+    }
+
+    public java.util.List<Cancion> listarPorAlbum(int id) throws ConexionBDException {
+        return consultar("SELECT c.* FROM cancion c JOIN artista ar ON ar.id_artista = c.id_artista "
+                + "JOIN album al ON al.id_album = c.id_album WHERE c.id_album = ? "
+                + "AND c.activo = TRUE AND ar.activo = TRUE AND al.activo = TRUE "
+                + "AND al.id_artista = c.id_artista ORDER BY c.id_cancion", id);
+    }
+
     private Integer idAlbumONull(Album album) {
         return album == null ? null : album.getIdAlbum();
     }
@@ -60,7 +74,7 @@ public class CancionDAO extends GenericDAO<Cancion> {
         if (rs.wasNull()) {
             c.setAlbum(null); // single
         } else {
-            c.setAlbum(albumDAO.buscarPorId(idAlbum));
+            c.setAlbum(albumDAO.buscarReferencia(idAlbum));
         }
         return c;
     }

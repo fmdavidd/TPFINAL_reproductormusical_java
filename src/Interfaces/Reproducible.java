@@ -4,7 +4,7 @@ import modelo.Cancion;
 
 import java.util.List;
 
-/// Representa un elemento que puede reproducirse en el reproductor musical.
+// Agrupa metadatos: titulo, duracion y canciones. No decodifica ni reproduce audio.
 public interface Reproducible {
 
     String getTitulo();

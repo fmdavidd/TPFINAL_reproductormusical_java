@@ -10,7 +10,7 @@ public class Artista {
     private String nombre;
     private String paisOrigen;
     private boolean activo;
-    private Set<Genero> generos;
+    private Set<Genero> generos = new HashSet<Genero>();
 
     public Artista(String nombre, String paisOrigen, boolean activo) {
         this.nombre = nombre;
@@ -55,7 +55,7 @@ public class Artista {
     }
 
     public Set<Genero> getGeneros() {
-        return generos;
+        return new HashSet<Genero>(generos);
     }
 
     public void setGeneros(Set<Genero> generos) {

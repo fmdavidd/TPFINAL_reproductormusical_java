@@ -1,122 +1,105 @@
 package Service;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import DAO.PlaylistDAO;
-import Excepciones.ConexionBDException;
-import Excepciones.ElementoDuplicadoException;
-import Excepciones.ElementoNoEncontradoException;
-import modelo.Cancion;
-import modelo.Playlist;
+import Excepciones.*;
+import modelo.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlaylistService {
+    private final PlaylistDAO dao = new PlaylistDAO();
+    private final SesionService sesion;
+    private final CancionService canciones;
 
-    private PlaylistDAO playlistDAO = new PlaylistDAO();
-    private CancionService cancionService;
-
-    private Map<Integer, Playlist> playlists = new LinkedHashMap<>();
-
-    public PlaylistService(CancionService cancionService) throws ConexionBDException {
-        this.cancionService = cancionService;
-        for (Playlist p : playlistDAO.listarActivos()) {
-            playlists.put(p.getIdPlaylist(), p);
-        }
+    public PlaylistService(CancionService canciones) throws ConexionBDException {
+        this(null, canciones);
+    }
+    public PlaylistService(SesionService sesion, CancionService canciones) {
+        this.sesion = sesion;
+        this.canciones = canciones;
     }
 
-
-    public void alta(Playlist p) throws ConexionBDException, ElementoDuplicadoException {
-        validarDuplicado(p);
-        int id = playlistDAO.insertar(p);
-        if (id <= 0) {
-            throw new ConexionBDException("No se pudo dar de alta la playlist");
-        }
+    public void alta(Playlist p) throws ConexionBDException, ElementoDuplicadoException, PermisoDenegadoException {
+        if (p == null || p.getIdPlaylist() != 0) throw new IllegalArgumentException("Un alta no debe tener ID asignado.");
+        validar(p);
+        if (!p.getCanciones().isEmpty()) throw new IllegalArgumentException("Cree la playlist vacia y agregue las canciones luego.");
+        int id = dao.insertar(p);
+        if (id <= 0) throw new ConexionBDException("No se pudo crear la playlist.");
         p.setIdPlaylist(id);
-        playlists.put(id, p);
     }
 
-    public void modificar(Playlist p)
-            throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException {
-        Playlist existente = buscarPorId(p.getIdPlaylist());
-        validarDuplicado(p);
-        if (!playlistDAO.modificar(p)) {
-            throw new ElementoNoEncontradoException("La playlist " + p.getIdPlaylist() + " no existe en la base");
-        }
-        existente.setNombre(p.getNombre());
-        existente.setDescripcion(p.getDescripcion());
-        existente.setPublica(p.isPublica());
+    public void modificar(Playlist p) throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException, PermisoDenegadoException {
+        if (p == null) throw new IllegalArgumentException("Entidad requerida.");
+        propia(p.getIdPlaylist());
+        validar(p);
+        Acceso.resultado(dao.modificar(p));
     }
 
-    public void baja(int id) throws ConexionBDException, ElementoNoEncontradoException {
-        buscarPorId(id);
-        playlistDAO.darDeBaja(id);
-        playlists.remove(id);
+    public void baja(int id) throws ConexionBDException, ElementoNoEncontradoException, PermisoDenegadoException {
+        propia(id);
+        Acceso.resultado(dao.darDeBaja(id));
     }
 
-    public void agregarCancion(int idPlaylist, int idCancion)
-            throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException {
-        Playlist p = buscarPorId(idPlaylist);
-        Cancion c = cancionService.buscarPorId(idCancion);
-        if (contieneCancion(p, idCancion)) {
-            throw new ElementoDuplicadoException("La cancion '" + c.getTitulo() + "' ya esta en la playlist");
-        }
-        int posicion = p.getCanciones().size();
-        playlistDAO.agregarCancion(idPlaylist, idCancion, posicion);
-        p.agregarCancion(c);
+    public void agregarCancion(int id, int idCancion) throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException, PermisoDenegadoException {
+        Playlist p = propia(id);
+        canciones.buscarPorId(idCancion);
+        for (Cancion c : p.getCanciones())
+            if (c.getIdCancion() == idCancion) throw new ElementoDuplicadoException("La cancion ya esta en la playlist.");
+        dao.agregarCancion(id, idCancion, p.getCanciones().size());
     }
 
-    public void quitarCancion(int idPlaylist, int idCancion)
-            throws ConexionBDException, ElementoNoEncontradoException {
-        Playlist p = buscarPorId(idPlaylist);
-        if (!contieneCancion(p, idCancion)) {
-            throw new ElementoNoEncontradoException("La cancion " + idCancion + " no esta en la playlist");
-        }
-        playlistDAO.quitarCancion(idPlaylist, idCancion);
-        p.quitarCancion(idCancion);
+    public void quitarCancion(int id, int idCancion) throws ConexionBDException, ElementoNoEncontradoException, PermisoDenegadoException {
+        Playlist p = propia(id);
+        boolean existe = false;
+        for (Cancion c : p.getCanciones()) if (c.getIdCancion() == idCancion) existe = true;
+        if (!existe) throw new ElementoNoEncontradoException("La cancion no esta en la playlist.");
+        dao.quitarCancion(id, idCancion);
     }
 
+    // Posiciones desde cero dentro del servicio; la consola muestra desde uno.
+    public void moverCancion(int id, int origen, int destino) throws ConexionBDException, ElementoNoEncontradoException, PermisoDenegadoException {
+        Playlist p = propia(id);
+        p.moverCancion(origen, destino);
+        dao.guardarOrden(id, p.getCanciones());
+    }
 
-    public Playlist buscarPorId(int id) throws ElementoNoEncontradoException {
-        Playlist p = playlists.get(id);
-        if (p == null) {
-            throw new ElementoNoEncontradoException("No existe la playlist con id " + id);
-        }
+    public Playlist buscarPorId(int id) throws ConexionBDException, ElementoNoEncontradoException, PermisoDenegadoException {
+        Usuario u = Acceso.autenticado(sesion);
+        Playlist p = id <= 0 ? null : dao.buscarPorId(id);
+        if (p == null || !p.isActivo()) throw new ElementoNoEncontradoException("No existe playlist activa con id " + id);
+        if (!p.isPublica() && p.getIdPropietario() != u.getIdUsuario()) throw new PermisoDenegadoException("La playlist es privada.");
         return p;
     }
 
-    public List<Playlist> listar() {
-        return new ArrayList<>(playlists.values());
+    public List<Playlist> listar() throws ConexionBDException, PermisoDenegadoException {
+        Usuario u = Acceso.autenticado(sesion);
+        List<Playlist> lista = new ArrayList<>();
+        for (Playlist p : dao.listarActivos())
+            if (p.isPublica() || p.getIdPropietario() == u.getIdUsuario()) lista.add(p);
+        return lista;
     }
 
-    public List<Playlist> listarPorUsuario(int idUsuario) {
-        List<Playlist> resultado = new ArrayList<>();
-        for (Playlist p : playlists.values()) {
-            if (p.getIdPropietario() == idUsuario) {
-                resultado.add(p);
-            }
-        }
-        return resultado;
+    public List<Playlist> listarPorUsuario(int id) throws ConexionBDException, PermisoDenegadoException {
+        List<Playlist> lista = new ArrayList<>();
+        for (Playlist p : listar()) if (p.getIdPropietario() == id) lista.add(p);
+        return lista;
     }
 
-
-    private boolean contieneCancion(Playlist p, int idCancion) {
-        for (Cancion c : p.getCanciones()) {
-            if (c.getIdCancion() == idCancion) {
-                return true;
-            }
-        }
-        return false;
+    private Playlist propia(int id) throws ConexionBDException, ElementoNoEncontradoException, PermisoDenegadoException {
+        Playlist p = buscarPorId(id);
+        Acceso.propietario(sesion, p.getIdPropietario());
+        return p;
     }
 
-    private void validarDuplicado(Playlist p) throws ElementoDuplicadoException {
-        for (Playlist otra : playlists.values()) {
-            if (otra.getIdPlaylist() != p.getIdPlaylist()
-                    && otra.getIdPropietario() == p.getIdPropietario()
-                    && otra.getNombre().equalsIgnoreCase(p.getNombre())) {
-                throw new ElementoDuplicadoException("Ya tenes una playlist llamada '" + p.getNombre() + "'");
-            }
-        }
+    private void validar(Playlist p) throws ConexionBDException, ElementoDuplicadoException, PermisoDenegadoException {
+        if (p == null || !p.isActivo()) throw new IllegalArgumentException("Playlist activa requerida.");
+        Usuario u = Acceso.autenticado(sesion);
+        if (!(u instanceof UsuarioNormal)) throw new PermisoDenegadoException("Las playlists corresponden a usuarios normales.");
+        Acceso.propietario(sesion, p.getIdPropietario());
+        Acceso.texto(p.getNombre(), 80, "Nombre");
+        if (p.getDescripcion() != null && p.getDescripcion().length() > 200) throw new IllegalArgumentException("Descripcion demasiado larga.");
+        for (Playlist otra : dao.listarPorUsuario(u.getIdUsuario()))
+            if (otra.getIdPlaylist() != p.getIdPlaylist() && otra.getNombre().trim().equalsIgnoreCase(p.getNombre().trim()))
+                throw new ElementoDuplicadoException("Ya tiene una playlist con ese nombre.");
     }
 }

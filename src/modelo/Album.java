@@ -12,7 +12,7 @@ public class Album implements Reproducible {
     private String portada;
     private Artista artista;
     private boolean activo;
-    private List<Cancion> canciones;
+    private List<Cancion> canciones = new ArrayList<Cancion>();
 
     public Album(String titulo, int anioLanzamiento, String portada, Artista artista, boolean activo) {
         this.titulo = titulo;
@@ -40,7 +40,7 @@ public class Album implements Reproducible {
     public void setActivo(boolean activo) { this.activo = activo; }
 
     @Override
-    public List<Cancion> getCanciones() { return canciones; }
+    public List<Cancion> getCanciones() { return new ArrayList<Cancion>(canciones); }
 
     public void setCanciones(List<Cancion> canciones) {
         this.canciones = canciones == null ? new ArrayList<Cancion>() : new ArrayList<Cancion>(canciones);

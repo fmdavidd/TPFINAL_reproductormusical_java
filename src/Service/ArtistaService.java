@@ -1,85 +1,69 @@
 package Service;
 
+import DAO.*;
+import Excepciones.*;
+import modelo.*;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-
-import DAO.ArtistaDAO;
-import Excepciones.ConexionBDException;
-import Excepciones.ElementoDuplicadoException;
-import Excepciones.ElementoNoEncontradoException;
-import modelo.Artista;
 
 public class ArtistaService {
+    private final ArtistaDAO dao = new ArtistaDAO();
+    private final SesionService sesion;
+    public ArtistaService() throws ConexionBDException { this((SesionService) null); }
+    public ArtistaService(SesionService sesion) { this.sesion = sesion; }
 
-    private ArtistaDAO artistaDAO = new ArtistaDAO();
-
-    // Coleccion en memoria: id -> artista
-    private Map<Integer, Artista> artistas = new LinkedHashMap<>();
-
-    public ArtistaService() throws ConexionBDException {
-        for (Artista a : artistaDAO.listarActivos()) {
-            artistas.put(a.getIdArtista(), a);
-        }
-    }
-
-
-    public void alta(Artista a) throws ConexionBDException, ElementoDuplicadoException {
-        validarDuplicado(a);
-        int id = artistaDAO.insertar(a);
-        if (id <= 0) {
-            throw new ConexionBDException("No se pudo dar de alta el artista");
-        }
+    public void alta(Artista a) throws ConexionBDException, ElementoDuplicadoException, PermisoDenegadoException {
+        Acceso.administrador(sesion, false);
+        if (a == null || a.getIdArtista() != 0) throw new IllegalArgumentException("Un alta no debe tener ID asignado.");
+        validar(a);
+        int id = dao.insertar(a);
+        if (id <= 0) throw new ConexionBDException("No se pudo crear artista.");
         a.setIdArtista(id);
-        artistas.put(id, a);
     }
 
-    public void modificar(Artista a)
-            throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException {
+    public void modificar(Artista a) throws ConexionBDException, ElementoDuplicadoException, ElementoNoEncontradoException, PermisoDenegadoException {
+        Acceso.administrador(sesion, false);
+        if (a == null) throw new IllegalArgumentException("Entidad requerida.");
         buscarPorId(a.getIdArtista());
-        validarDuplicado(a);
-        if (!artistaDAO.modificar(a)) {
-            throw new ElementoNoEncontradoException("El artista " + a.getIdArtista() + " no existe en la base");
-        }
-        artistas.put(a.getIdArtista(), a);
+        validar(a);
+        Acceso.resultado(dao.modificar(a));
     }
 
-    public void baja(int id) throws ConexionBDException, ElementoNoEncontradoException {
+    public void baja(int id) throws ConexionBDException, ElementoNoEncontradoException, PermisoDenegadoException {
+        Acceso.administrador(sesion, false);
         buscarPorId(id);
-        artistaDAO.darDeBaja(id);
-        artistas.remove(id);
+        for (Album a : new AlbumDAO().listarActivos())
+            if (a.getArtista().getIdArtista() == id) throw new IllegalArgumentException("Primero de de baja los albumes del artista.");
+        for (Cancion c : new CancionDAO().listarActivos())
+            if (c.getArtista().getIdArtista() == id) throw new IllegalArgumentException("Primero de de baja las canciones del artista.");
+        Acceso.resultado(dao.darDeBaja(id));
     }
 
-
-    public Artista buscarPorId(int id) throws ElementoNoEncontradoException {
-        Artista a = artistas.get(id);
-        if (a == null) {
-            throw new ElementoNoEncontradoException("No existe el artista con id " + id);
-        }
+    public Artista buscarPorId(int id) throws ConexionBDException, ElementoNoEncontradoException, PermisoDenegadoException {
+        Acceso.autenticado(sesion);
+        Artista a = id <= 0 ? null : dao.buscarPorId(id);
+        if (a == null || !a.isActivo()) throw new ElementoNoEncontradoException("No existe artista activo con id " + id);
         return a;
     }
 
-    public List<Artista> listar() {
-        return new ArrayList<>(artistas.values());
+    public List<Artista> listar() throws ConexionBDException, PermisoDenegadoException {
+        Acceso.autenticado(sesion);
+        return dao.listarActivos();
     }
 
-    public List<Artista> buscarPorNombre(String texto) {
+    private void validar(Artista a) throws ConexionBDException, ElementoDuplicadoException {
+        if (a == null || !a.isActivo()) throw new IllegalArgumentException("Se requiere una entidad activa.");
+        Acceso.texto(a.getNombre(), 80, "Nombre o titulo");
+
+        Acceso.texto(a.getPaisOrigen(), 50, "Pais");
+        for (Artista otro : dao.listarActivos()) {
+            if (otro.getIdArtista() != a.getIdArtista() && otro.getNombre().trim().equalsIgnoreCase(a.getNombre().trim()))
+                throw new ElementoDuplicadoException("Ya existe artista con ese nombre.");
+        }
+    }
+    public List<Artista> buscarPorNombre(String texto) throws ConexionBDException, PermisoDenegadoException {
         List<Artista> resultado = new ArrayList<>();
-        for (Artista a : artistas.values()) {
-            if (a.getNombre().toLowerCase().contains(texto.toLowerCase())) {
-                resultado.add(a);
-            }
-        }
+        for (Artista a : listar()) if (a.getNombre().toLowerCase().contains(texto.toLowerCase())) resultado.add(a);
         return resultado;
-    }
-
-
-    private void validarDuplicado(Artista a) throws ElementoDuplicadoException {
-        for (Artista otro : artistas.values()) {
-            if (otro.getIdArtista() != a.getIdArtista() && otro.getNombre().equalsIgnoreCase(a.getNombre())) {
-                throw new ElementoDuplicadoException("Ya existe el artista '" + a.getNombre() + "'");
-            }
-        }
     }
 }

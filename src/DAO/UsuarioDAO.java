@@ -30,6 +30,11 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
         return "id_usuario";
     }
 
+    public Usuario buscarPorEmail(String email) throws ConexionBDException {
+        java.util.List<Usuario> lista = consultar("SELECT * FROM usuario WHERE email = ?", email);
+        return lista.isEmpty() ? null : lista.get(0);
+    }
+
     @Override
     public int insertar(Usuario u) throws ConexionBDException {
         LocalDate fecha = u.getFechaRegistro() != null ? u.getFechaRegistro() : LocalDate.now();
@@ -85,7 +90,10 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
 
     private Set<Integer> cargarFavoritos(int idUsuario) throws ConexionBDException {
         Set<Integer> ids = new HashSet<>();
-        String sql = "SELECT id_cancion FROM favorito WHERE id_usuario = ?";
+        String sql = "SELECT f.id_cancion FROM favorito f JOIN cancion c ON c.id_cancion = f.id_cancion "
+                + "JOIN artista ar ON ar.id_artista = c.id_artista LEFT JOIN album al ON al.id_album = c.id_album "
+                + "WHERE f.id_usuario = ? AND c.activo = TRUE AND ar.activo = TRUE "
+                + "AND (c.id_album IS NULL OR (al.activo = TRUE AND al.id_artista = c.id_artista))";
         try (java.sql.Connection con = ConexionBD.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, idUsuario);
@@ -101,14 +109,16 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
     }
 
     private void cargarRegistroAcciones(UsuarioAdministrador admin) throws ConexionBDException {
-        String sql = "SELECT fecha_hora, accion FROM registro_accion WHERE id_admin = ?";
+        String sql = "SELECT fecha_hora, accion FROM registro_accion WHERE id_admin = ? ORDER BY fecha_hora, id_registro";
         try (java.sql.Connection con = ConexionBD.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, admin.getIdUsuario());
             TreeMap<LocalDateTime, String> registro = new TreeMap<>();
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    registro.put(rs.getTimestamp("fecha_hora").toLocalDateTime(), rs.getString("accion"));
+                    LocalDateTime momento = rs.getTimestamp("fecha_hora").toLocalDateTime();
+                    while (registro.containsKey(momento)) momento = momento.plusNanos(1);
+                    registro.put(momento, rs.getString("accion"));
                 }
             }
             admin.setRegistroAcciones(registro);
@@ -151,6 +161,7 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
 
         if (u instanceof UsuarioNormal) {
             ((UsuarioNormal) u).setFavoritos(cargarFavoritos(u.getIdUsuario()));
+            ((UsuarioNormal) u).setPlaylists(new PlaylistDAO().listarPorUsuario(u.getIdUsuario()));
         } else {
             cargarRegistroAcciones((UsuarioAdministrador) u);
         }

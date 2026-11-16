@@ -38,6 +38,23 @@ public class AlbumDAO extends GenericDAO<Album> {
     }
 
     @Override
+    public Album buscarPorId(int id) throws ConexionBDException {
+        Album a = super.buscarPorId(id);
+        if (a != null) a.setCanciones(new CancionDAO().listarPorAlbum(id));
+        return a;
+    }
+
+    @Override
+    public java.util.List<Album> listarActivos() throws ConexionBDException {
+        java.util.List<Album> lista = consultar("SELECT al.* FROM album al "
+                + "JOIN artista ar ON ar.id_artista = al.id_artista WHERE al.activo = TRUE AND ar.activo = TRUE");
+        for (Album a : lista) a.setCanciones(new CancionDAO().listarPorAlbum(a.getIdAlbum()));
+        return lista;
+    }
+
+    public Album buscarReferencia(int id) throws ConexionBDException { return super.buscarPorId(id); }
+
+    @Override
     public Album mapear(ResultSet rs) throws SQLException, ConexionBDException {
         Album a = new Album();
         a.setIdAlbum(rs.getInt("id_album"));
