@@ -33,4 +33,14 @@ public class Seguridad {
         }
         return sb.toString();
     }
+
+        /*
+        public static void() {
+            String salt = Seguridad.generarSalt();
+            System.out.println("salt: " + salt);
+            System.out.println("hash: " + Seguridad.hashear("1234", salt));
+        }
+        */
+
+
 }
