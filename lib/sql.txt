@@ -1,4 +1,3 @@
-
 DROP DATABASE IF EXISTS ReproductorMusicalBD;
 CREATE DATABASE ReproductorMusicalBD CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE ReproductorMusicalBD;
@@ -10,8 +9,8 @@ CREATE TABLE usuario (
     hash_contrasenia  VARCHAR(128) NOT NULL,
     salt              VARCHAR(64)  NOT NULL,
     rol               ENUM('NORMAL','ADMIN') NOT NULL,
-    premium           BOOLEAN NULL,          -- solo NORMAL
-    nivel_admin       VARCHAR(20) NULL,      -- solo ADMIN
+    premium           BOOLEAN NULL,
+    nivel_admin       VARCHAR(20) NULL,
     fecha_registro    DATE NOT NULL,
     activo            BOOLEAN DEFAULT TRUE
 );
@@ -47,7 +46,7 @@ CREATE TABLE cancion (
     ruta_archivo       VARCHAR(255),
     genero             VARCHAR(20) NOT NULL,
     id_artista         INT NOT NULL,
-    id_album           INT NULL,             -- NULL si es single
+    id_album           INT NULL,
     activo             BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (id_artista) REFERENCES artista(id_artista),
     FOREIGN KEY (id_album)   REFERENCES album(id_album)
@@ -89,12 +88,6 @@ CREATE TABLE registro_accion (
     FOREIGN KEY (id_admin) REFERENCES usuario(id_usuario)
 );
 
-
--- Usuarios: ids 1-3 administradores (uno por nivel), 4-5 normales (uno premium y uno no).
--- Hash y salt reales, generados con la clase Seguridad (SHA-256 de salt + contrasenia):
---   ids 1-3  (ADMIN):   admin123
---   ids 4-5  (NORMAL):  1234
--- Ejemplo de login: juan@mail.com / 1234  -  admin@musica.com / admin123
 INSERT INTO usuario (id_usuario, nombre, email, hash_contrasenia, salt, rol, premium, nivel_admin, fecha_registro) VALUES
 (1, 'Admin Principal', 'admin@musica.com', '8a6a11436199e11b847d37c4b29f5fc9bcb0503f2d15ee4bfd4d6bdc88e035fb', 'fbaedff104b9af00c13de46c161214e6', 'ADMIN',  NULL, 'SUPERADMIN',   '2026-01-10'),
 (2, 'Laura Editora',   'laura@musica.com', '5d96c27db2ef74fa6f063464efcf1b6405b182813fda8494eb14b095199f5d16', '551ddab45d389b8111137971cab1f007', 'ADMIN',  NULL, 'EDITOR',       '2026-01-12'),
@@ -116,7 +109,6 @@ INSERT INTO artista_genero (id_artista, genero) VALUES
 (4, 'METAL'),
 (5, 'ELECTRONICA');
 
--- Mercedes Sosa no tiene album: su cancion es un single
 INSERT INTO album (id_album, titulo, anio_lanzamiento, portada, id_artista) VALUES
 (1, 'Signos',             1986, 'portadas/signos.jpg',    1),
 (2, 'Clics Modernos',     1983, 'portadas/clics.jpg',     2),
@@ -153,9 +145,6 @@ INSERT INTO registro_accion (id_admin, fecha_hora, accion) VALUES
 (2, '2026-01-12 11:30:00', 'Alta de cancion: Signos'),
 (1, '2026-01-14 16:45:00', 'Cambio de nivel de admin: Tomas Revisor');
 
-
--- Datos adicionales: 15 registros en cada entidad principal.
--- Los nuevos usuarios normales (ids 6-15) tienen contrasenia: 1234.
 INSERT INTO usuario (id_usuario, nombre, email, hash_contrasenia, salt, rol, premium, nivel_admin, fecha_registro) VALUES
 (6, 'Ana Lopez', 'ana@mail.com', 'd13c95feabd92519b25e10a2d5e9cb9c3b2d408c75e9ea02511003e9d7d9b4a4', '551bce872da9fc64fb5833996603091a', 'NORMAL', TRUE, NULL, '2026-03-06'),
 (7, 'Pedro Martinez', 'pedro@mail.com', 'de2fbd9ac684b886ec17ecad0461735e9274e4fcc83276d3b0bd8269fb387ca8', '14081b0c2e32734bafe131961025c103', 'NORMAL', FALSE, NULL, '2026-03-07'),
@@ -245,7 +234,6 @@ INSERT INTO favorito (id_usuario, id_cancion, fecha_agregado) VALUES
 (13, 15, '2026-03-23'),
 (14, 1, '2026-03-24'), (14, 9, '2026-03-24'),
 (15, 12, '2026-03-25'), (15, 13, '2026-03-25');
-
 
 SELECT 'usuario' AS tabla, COUNT(*) AS filas FROM usuario
 UNION ALL SELECT 'artista',  COUNT(*) FROM artista
