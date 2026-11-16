@@ -17,6 +17,7 @@ import modelo.Album;
 import modelo.Artista;
 import modelo.Cancion;
 import modelo.Playlist;
+import modelo.ReproductorMusical;
 import modelo.Usuario;
 import modelo.UsuarioAdministrador;
 import modelo.UsuarioNormal;
@@ -30,6 +31,7 @@ public class Main {
     private static AlbumService albumes;
     private static PlaylistService playlists;
     private static SesionService sesion;
+    private static final ReproductorMusical reproductor = new ReproductorMusical();
 
     public static void main(String[] args) {
         try {
@@ -92,6 +94,7 @@ public class Main {
                     System.out.println("4. Playlists");
                     System.out.println("5. Usuarios (admin)");
                     System.out.println("6. Favoritos");
+                    System.out.println("7. Reproductor");
                     System.out.println("0. Cerrar sesion");
 
                     opcion = numero("Opcion");
@@ -120,6 +123,10 @@ public class Main {
                         }
                         case 6: {
                             favoritos();
+                            break;
+                        }
+                        case 7: {
+                            reproductor();
                             break;
                         }
                         case 0: {
@@ -623,6 +630,100 @@ public class Main {
 
             if (id == sesion.getUsuarioActual().getIdUsuario()) {
                 sesion.iniciarSesion(email, contrasenia);
+            }
+        }
+    }
+
+    private static void reproductor() throws Exception {
+        int opcion = -1;
+
+        while (opcion != 0) {
+            System.out.println("\nREPRODUCTOR");
+            System.out.println("1. Reproducir cancion");
+            System.out.println("2. Reproducir album");
+            System.out.println("3. Reproducir playlist");
+            System.out.println("4. Agregar cancion a la cola");
+            System.out.println("5. Pausar");
+            System.out.println("6. Reanudar");
+            System.out.println("7. Detener");
+            System.out.println("8. Siguiente");
+            System.out.println("9. Anterior");
+            System.out.println("10. Volumen");
+            System.out.println("11. Ver cola");
+            System.out.println("0. Volver");
+
+            opcion = numero("Opcion");
+
+            try {
+                switch (opcion) {
+                    case 1: {
+                        reproductor.reproducir(canciones.buscarPorId(numero("ID de cancion")));
+                        break;
+                    }
+                    case 2: {
+                        Album album = albumes.buscarPorId(numero("ID de album"));
+                        // El album no trae sus canciones cargadas: se las pedimos al service.
+                        album.setCanciones(albumes.listarCanciones(album.getIdAlbum()));
+                        reproductor.reproducir(album);
+                        break;
+                    }
+                    case 3: {
+                        Playlist playlist = playlists.buscarPorId(numero("ID de playlist"));
+                        boolean tienePermiso = sesion.esAdministrador() || playlist.isPublica()
+                                || playlist.getIdPropietario() == sesion.getUsuarioActual().getIdUsuario();
+
+                        if (!tienePermiso) {
+                            throw new PermisoDenegadoException("No tenes permiso sobre esta playlist.");
+                        }
+                        reproductor.reproducir(playlist);
+                        break;
+                    }
+                    case 4: {
+                        Cancion cancion = canciones.buscarPorId(numero("ID de cancion"));
+                        reproductor.agregarACola(cancion);
+                        System.out.println("Agregada a la cola: " + cancion.getTitulo());
+                        break;
+                    }
+                    case 5: {
+                        reproductor.pausar();
+                        break;
+                    }
+                    case 6: {
+                        reproductor.reanudar();
+                        break;
+                    }
+                    case 7: {
+                        reproductor.detener();
+                        break;
+                    }
+                    case 8: {
+                        reproductor.siguiente();
+                        break;
+                    }
+                    case 9: {
+                        reproductor.anterior();
+                        break;
+                    }
+                    case 10: {
+                        reproductor.setVolumen(numero("Volumen (0 a 100)"));
+                        break;
+                    }
+                    case 11: {
+                        reproductor.mostrarCola();
+                        break;
+                    }
+                    case 0: {
+                        break;
+                    }
+                    default: {
+                        System.out.println("Opcion invalida.");
+                        break;
+                    }
+                }
+            } catch (NoSuchElementException e) {
+                throw e;
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
             }
         }
     }
