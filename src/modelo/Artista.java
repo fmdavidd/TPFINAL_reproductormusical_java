@@ -59,7 +59,13 @@ public class Artista {
     }
 
     public void setGeneros(Set<Genero> generos) {
-        this.generos = generos == null ? new HashSet<Genero>() : new HashSet<Genero>(generos);
+
+        if (generos == null) {
+            this.generos = new HashSet<>();
+        } else {
+            this.generos = new HashSet<>(generos);
+        }
+
     }
 
     public boolean agregarGenero(Genero genero) {

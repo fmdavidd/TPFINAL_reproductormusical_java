@@ -4,6 +4,7 @@ import Interfaces.Reproducible;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Playlist implements Reproducible {
     private int idPlaylist;
@@ -43,7 +44,13 @@ public class Playlist implements Reproducible {
     public List<Cancion> getCanciones() { return canciones; }
 
     public void setCanciones(List<Cancion> canciones) {
-        this.canciones = canciones == null ? new ArrayList<Cancion>() : new ArrayList<Cancion>(canciones);
+
+        if (canciones == null) {
+            this.canciones = new ArrayList<>();
+        } else {
+            this.canciones = new ArrayList<>(canciones);
+        }
+
     }
 
     public boolean agregarCancion(Cancion cancion) {
@@ -65,10 +72,12 @@ public class Playlist implements Reproducible {
     }
 
     public void moverCancion(int posicionOrigen, int posicionDestino) {
+
         if (posicionOrigen < 0 || posicionOrigen >= canciones.size()
                 || posicionDestino < 0 || posicionDestino >= canciones.size()) {
             throw new IndexOutOfBoundsException("Las posiciones deben existir en la playlist.");
         }
+
         Cancion cancion = canciones.remove(posicionOrigen);
         canciones.add(posicionDestino, cancion);
     }
@@ -83,5 +92,30 @@ public class Playlist implements Reproducible {
             total += cancion.getDuracionTotal();
         }
         return total;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Playlist playlist = (Playlist) o;
+        return idPlaylist == playlist.idPlaylist;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(idPlaylist);
+    }
+
+    @Override
+    public String toString() {
+        return "Playlist{" +
+                "idPlaylist=" + idPlaylist +
+                ", nombre='" + nombre + '\'' +
+                ", descripcion='" + descripcion + '\'' +
+                ", publica=" + publica +
+                ", idPropietario=" + idPropietario +
+                ", activo=" + activo +
+                ", canciones=" + canciones +
+                '}';
     }
 }

@@ -4,6 +4,7 @@ import Interfaces.Reproducible;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Album implements Reproducible {
     private int idAlbum;
@@ -43,8 +44,14 @@ public class Album implements Reproducible {
     public List<Cancion> getCanciones() { return canciones; }
 
     public void setCanciones(List<Cancion> canciones) {
-        this.canciones = canciones == null ? new ArrayList<Cancion>() : new ArrayList<Cancion>(canciones);
+
+        if (canciones == null) {
+            this.canciones = new ArrayList<>();
+        } else {
+            this.canciones = new ArrayList<>(canciones);
+        }
     }
+
 
     public void agregarCancion(Cancion cancion) {
         if (cancion != null && !canciones.contains(cancion)) {
@@ -74,5 +81,30 @@ public class Album implements Reproducible {
             total += cancion.getDuracionTotal();
         }
         return total;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Album album = (Album) o;
+        return idAlbum == album.idAlbum;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(idAlbum);
+    }
+
+    @Override
+    public String toString() {
+        return "Album{" +
+                "idAlbum=" + idAlbum +
+                ", titulo='" + titulo + '\'' +
+                ", anioLanzamiento=" + anioLanzamiento +
+                ", portada='" + portada + '\'' +
+                ", artista=" + artista +
+                ", activo=" + activo +
+                ", canciones=" + canciones +
+                '}';
     }
 }
