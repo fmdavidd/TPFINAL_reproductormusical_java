@@ -154,6 +154,99 @@ INSERT INTO registro_accion (id_admin, fecha_hora, accion) VALUES
 (1, '2026-01-14 16:45:00', 'Cambio de nivel de admin: Tomas Revisor');
 
 
+-- Datos adicionales: 15 registros en cada entidad principal.
+-- Los nuevos usuarios normales (ids 6-15) tienen contrasenia: 1234.
+INSERT INTO usuario (id_usuario, nombre, email, hash_contrasenia, salt, rol, premium, nivel_admin, fecha_registro) VALUES
+(6, 'Ana Lopez', 'ana@mail.com', 'd13c95feabd92519b25e10a2d5e9cb9c3b2d408c75e9ea02511003e9d7d9b4a4', '551bce872da9fc64fb5833996603091a', 'NORMAL', TRUE, NULL, '2026-03-06'),
+(7, 'Pedro Martinez', 'pedro@mail.com', 'de2fbd9ac684b886ec17ecad0461735e9274e4fcc83276d3b0bd8269fb387ca8', '14081b0c2e32734bafe131961025c103', 'NORMAL', FALSE, NULL, '2026-03-07'),
+(8, 'Lucia Fernandez', 'lucia@mail.com', 'da280ee4a799c67899ef3e25a2e976083bd4c8d873ad2f44df89936ce5385612', '3e6c2e12fa3a5c30324b99986074c02e', 'NORMAL', TRUE, NULL, '2026-03-08'),
+(9, 'Diego Rodriguez', 'diego@mail.com', '31d06fb7d21ea6db25e7fcc291ae0a10826bdadc8b7be30cab373951afddbe32', '2bf306af648706bf5835a35b1a5e588b', 'NORMAL', FALSE, NULL, '2026-03-09'),
+(10, 'Sofia Torres', 'sofia@mail.com', 'ec02913b264a9118517c780c089c4c0079b7363b41ba8c1e1aab1500a683e8d5', '4e80d5a39d10e2af42b8941154b4b692', 'NORMAL', TRUE, NULL, '2026-03-10'),
+(11, 'Martin Diaz', 'martin@mail.com', '899fd9320d0f120a721f2a206b552828d1ef38bf15b596d4d229f369b8d2dc0b', '07b55a866b42c10b38ae8255d98d4702', 'NORMAL', FALSE, NULL, '2026-03-11'),
+(12, 'Valentina Ruiz', 'valentina@mail.com', 'f215ab913a4ae74afa528a2f13d0dd7c359f041f6a16bbeb6eca9dd4ce4d444a', 'a0b13174b49cad9569644001cd3b8ddc', 'NORMAL', TRUE, NULL, '2026-03-12'),
+(13, 'Nicolas Romero', 'nicolas@mail.com', '50691864dfc6450890be45993c5e59db403a9d5dac280f7863e45f02d5f4f745', '952c235f6ab4b8ad72ed7febff8de9d2', 'NORMAL', FALSE, NULL, '2026-03-13'),
+(14, 'Camila Silva', 'camila@mail.com', '10738d6e48447be767240931307ebb54218b3475089a42f0cf2b2380e7834590', '1dda4087b9b52a65f0c9b03bccece0c5', 'NORMAL', TRUE, NULL, '2026-03-14'),
+(15, 'Lucas Castro', 'lucas@mail.com', '3ad473e8341ae31b4e9109a46def59d516566943d5e1c6a34a103ee697e7fc01', 'bfe9b38916c26cc259f9ea4ad37c6a5d', 'NORMAL', FALSE, NULL, '2026-03-15');
+
+INSERT INTO artista (id_artista, nombre, pais_origen) VALUES
+(6, 'Luis Alberto Spinetta', 'Argentina'),
+(7, 'Fito Paez', 'Argentina'),
+(8, 'Gustavo Cerati', 'Argentina'),
+(9, 'Queen', 'Reino Unido'),
+(10, 'The Beatles', 'Reino Unido'),
+(11, 'Michael Jackson', 'Estados Unidos'),
+(12, 'Adele', 'Reino Unido'),
+(13, 'Miles Davis', 'Estados Unidos'),
+(14, 'Bob Marley', 'Jamaica'),
+(15, 'Los Angeles Azules', 'Mexico');
+
+INSERT INTO artista_genero (id_artista, genero) VALUES
+(6, 'ROCK'), (7, 'ROCK'), (8, 'ROCK'), (8, 'ELECTRONICA'),
+(9, 'ROCK'), (10, 'ROCK'), (11, 'POP'), (12, 'POP'),
+(13, 'JAZZ'), (14, 'FOLK'), (15, 'CUMBIA');
+
+INSERT INTO album (id_album, titulo, anio_lanzamiento, portada, id_artista) VALUES
+(5, 'Artaud', 1973, 'portadas/artaud.jpg', 6),
+(6, 'El amor despues del amor', 1992, 'portadas/elamor.jpg', 7),
+(7, 'Bocanada', 1999, 'portadas/bocanada.jpg', 8),
+(8, 'A Night at the Opera', 1975, 'portadas/opera.jpg', 9),
+(9, 'Abbey Road', 1969, 'portadas/abbeyroad.jpg', 10),
+(10, 'Thriller', 1982, 'portadas/thriller.jpg', 11),
+(11, '21', 2011, 'portadas/21.jpg', 12),
+(12, 'Kind of Blue', 1959, 'portadas/kindofblue.jpg', 13),
+(13, 'Exodus', 1977, 'portadas/exodus.jpg', 14),
+(14, 'Inolvidables', 1996, 'portadas/inolvidables.jpg', 15),
+(15, 'Doble vida', 1988, 'portadas/doblevida.jpg', 1);
+
+INSERT INTO cancion (id_cancion, titulo, duracion_segundos, ruta_archivo, genero, id_artista, id_album) VALUES
+(6, 'Todas las hojas son del viento', 192, 'musica/hojas.mp3', 'ROCK', 6, 5),
+(7, 'El amor despues del amor', 311, 'musica/elamor.mp3', 'ROCK', 7, 6),
+(8, 'Puente', 273, 'musica/puente.mp3', 'ROCK', 8, 7),
+(9, 'Bohemian Rhapsody', 354, 'musica/bohemian.mp3', 'ROCK', 9, 8),
+(10, 'Come Together', 259, 'musica/cometogether.mp3', 'ROCK', 10, 9),
+(11, 'Billie Jean', 294, 'musica/billiejean.mp3', 'POP', 11, 10),
+(12, 'Rolling in the Deep', 228, 'musica/rolling.mp3', 'POP', 12, 11),
+(13, 'So What', 562, 'musica/sowhat.mp3', 'JAZZ', 13, 12),
+(14, 'Three Little Birds', 180, 'musica/threebirds.mp3', 'FOLK', 14, 13),
+(15, 'Como te voy a olvidar', 270, 'musica/olvidar.mp3', 'CUMBIA', 15, 14);
+
+INSERT INTO playlist (id_playlist, nombre, descripcion, publica, id_usuario) VALUES
+(6, 'Acusticos', 'Canciones para una tarde tranquila', TRUE, 6),
+(7, 'Rock argentino', 'Artistas del rock nacional', FALSE, 7),
+(8, 'Clasicos internacionales', 'Canciones de distintas decadas', TRUE, 8),
+(9, 'Para entrenar', 'Musica para moverse', FALSE, 9),
+(10, 'Pop de siempre', 'Temas populares', TRUE, 10),
+(11, 'Jazz para estudiar', 'Una seleccion de jazz', FALSE, 11),
+(12, 'Para descansar', 'Musica para bajar el ritmo', TRUE, 12),
+(13, 'Fiesta', 'Canciones para compartir', FALSE, 13),
+(14, 'Viaje largo', 'Musica para la ruta', TRUE, 14),
+(15, 'Descubrimientos', 'Artistas y estilos variados', FALSE, 15);
+
+INSERT INTO playlist_cancion (id_playlist, id_cancion, posicion) VALUES
+(6, 6, 0), (6, 3, 1),
+(7, 7, 0), (7, 8, 1),
+(8, 9, 0), (8, 10, 1),
+(9, 4, 0), (9, 5, 1),
+(10, 11, 0), (10, 12, 1),
+(11, 13, 0),
+(12, 14, 0), (12, 6, 1),
+(13, 15, 0), (13, 11, 1),
+(14, 1, 0), (14, 9, 1),
+(15, 12, 0), (15, 13, 1), (15, 14, 2);
+
+INSERT INTO favorito (id_usuario, id_cancion, fecha_agregado) VALUES
+(6, 6, '2026-03-16'), (6, 3, '2026-03-16'),
+(7, 7, '2026-03-17'), (7, 8, '2026-03-17'),
+(8, 9, '2026-03-18'), (8, 10, '2026-03-18'),
+(9, 4, '2026-03-19'), (9, 5, '2026-03-19'),
+(10, 11, '2026-03-20'), (10, 12, '2026-03-20'),
+(11, 13, '2026-03-21'),
+(12, 14, '2026-03-22'), (12, 6, '2026-03-22'),
+(13, 15, '2026-03-23'),
+(14, 1, '2026-03-24'), (14, 9, '2026-03-24'),
+(15, 12, '2026-03-25'), (15, 13, '2026-03-25');
+
+
 SELECT 'usuario' AS tabla, COUNT(*) AS filas FROM usuario
 UNION ALL SELECT 'artista',  COUNT(*) FROM artista
 UNION ALL SELECT 'album',    COUNT(*) FROM album
