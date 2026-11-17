@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="Vista.controladores.PlaylistsController"
+      spacing="12">
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+
+    <VBox spacing="8" HBox.hgrow="ALWAYS">
+        <Label text="Playlists" styleClass="titulo-vista"/>
+        <HBox spacing="8">
+            <TextField fx:id="txtBuscar" promptText="Buscar playlist..." HBox.hgrow="ALWAYS"/>
+            <Button text="Buscar" onAction="#buscar"/>
+            <Button text="Limpiar" onAction="#limpiarBusqueda"/>
+        </HBox>
+        <TableView fx:id="tblPlaylists" prefHeight="190" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colNombre" text="Nombre" prefWidth="200"/>
+                <TableColumn fx:id="colPropietario" text="Propietario" prefWidth="140"/>
+                <TableColumn fx:id="colCanciones" text="Canciones" prefWidth="85"/>
+                <TableColumn fx:id="colDuracion" text="Duracion" prefWidth="90"/>
+                <TableColumn fx:id="colPublica" text="Publica" prefWidth="70"/>
+            </columns>
+        </TableView>
+
+        <Label fx:id="lblPlaylist" text="Canciones de la playlist" styleClass="subtitulo"/>
+        <ListView fx:id="lstCanciones" VBox.vgrow="ALWAYS"/>
+        <HBox spacing="8">
+            <Button text="Reproducir" onAction="#reproducir"/>
+            <Button fx:id="btnSubir" text="Subir" onAction="#subir"/>
+            <Button fx:id="btnBajar" text="Bajar" onAction="#bajar"/>
+            <Button fx:id="btnQuitar" text="Quitar" onAction="#quitarCancion"/>
+        </HBox>
+    </VBox>
+
+    <VBox fx:id="formulario" styleClass="panel-formulario" prefWidth="310" minWidth="310" spacing="6">
+        <Label fx:id="lblFormTitulo" text="Nueva playlist" styleClass="subtitulo"/>
+        <Label text="Nombre" styleClass="etiqueta-formulario"/>
+        <TextField fx:id="txtNombre"/>
+        <Label text="Descripcion" styleClass="etiqueta-formulario"/>
+        <TextArea fx:id="txtDescripcion" prefRowCount="3" wrapText="true"/>
+        <CheckBox fx:id="chkPublica" text="Playlist publica"/>
+        <Separator/>
+        <Label text="Agregar cancion" styleClass="etiqueta-formulario"/>
+        <ComboBox fx:id="cmbCancion" maxWidth="Infinity"/>
+        <Button fx:id="btnAgregar" text="Agregar a la playlist" onAction="#agregarCancion" maxWidth="Infinity"/>
+        <Separator/>
+        <HBox spacing="6">
+            <Button fx:id="btnGuardar" text="Guardar" onAction="#guardar" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnNueva" text="Nueva" onAction="#nueva" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        </HBox>
+        <HBox spacing="8">
+            <Button fx:id="btnEliminar" text="Eliminar playlist" onAction="#eliminar"/>
+        </HBox>
+        <Label fx:id="lblMensaje" styleClass="texto-secundario" wrapText="true"/>
+    </VBox>
+</HBox>

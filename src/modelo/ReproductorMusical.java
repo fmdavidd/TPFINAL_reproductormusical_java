@@ -117,6 +117,31 @@ public class ReproductorMusical {
         return estado;
     }
 
+    public List<Reproducible> getCola() {
+        return new ArrayList<>(cola);
+    }
+
+    // Reemplaza la cola por la lista indicada y arranca en el indice pedido.
+    public void reproducirLista(List<? extends Reproducible> lista, int indice) {
+        detener();
+        for (Reproducible elemento : lista) {
+            agregarACola(elemento);
+        }
+        if (lista.isEmpty()) {
+            return;
+        }
+        indiceActual = Math.max(0, Math.min(indice, lista.size() - 1));
+        estado = EstadoReproduccion.REPRODUCIENDO;
+    }
+
+    public int getIndiceActual() {
+        return indiceActual;
+    }
+
+    public Reproducible getActual() {
+        return cola.isEmpty() ? null : cola.get(indiceActual);
+    }
+
     private void mostrarActual() {
         Reproducible actual = cola.get(indiceActual);
         System.out.println("Reproduciendo (" + (indiceActual + 1) + "/" + cola.size() + "): "

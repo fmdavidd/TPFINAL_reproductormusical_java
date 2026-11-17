@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="Vista.controladores.RegistroAccionesController"
+      spacing="8">
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+
+    <Label text="Registro de acciones" styleClass="titulo-vista"/>
+    <Label fx:id="lblResumen" styleClass="texto-secundario" wrapText="true"/>
+
+    <HBox spacing="8" alignment="CENTER_LEFT">
+        <CheckBox fx:id="chkFiltrar" text="Filtrar por fecha"/>
+        <DatePicker fx:id="dpFecha"/>
+        <Button text="Hoy" onAction="#hoy"/>
+        <Button text="Ver todas" onAction="#verTodas"/>
+        <Button text="Actualizar" onAction="#recargar"/>
+    </HBox>
+
+    <TableView fx:id="tblAcciones" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colFecha" text="Fecha" prefWidth="110"/>
+            <TableColumn fx:id="colHora" text="Hora" prefWidth="90"/>
+            <TableColumn fx:id="colAccion" text="Accion" prefWidth="600"/>
+        </columns>
+    </TableView>
+</VBox>

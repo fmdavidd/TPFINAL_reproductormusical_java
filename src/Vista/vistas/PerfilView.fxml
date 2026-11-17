@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="Vista.controladores.PerfilController"
+      spacing="10">
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+
+    <Label text="Mi perfil" styleClass="titulo-vista"/>
+    <Label fx:id="lblInfo" styleClass="texto-secundario" wrapText="true"/>
+    <Label fx:id="lblResumen" styleClass="texto-secundario" wrapText="true"/>
+
+    <HBox spacing="16">
+        <VBox styleClass="panel-formulario" prefWidth="340" spacing="6">
+            <Label text="Datos de la cuenta" styleClass="subtitulo"/>
+            <Label text="Nombre" styleClass="etiqueta-formulario"/>
+            <TextField fx:id="txtNombre"/>
+            <Label text="Email" styleClass="etiqueta-formulario"/>
+            <TextField fx:id="txtEmail"/>
+            <CheckBox fx:id="chkPremium" text="Cuenta premium"/>
+            <Separator/>
+            <Label text="Cambiar contrasenia (opcional)" styleClass="subtitulo"/>
+            <Label text="Contrasenia actual" styleClass="etiqueta-formulario"/>
+            <PasswordField fx:id="txtActual"/>
+            <Label text="Contrasenia nueva" styleClass="etiqueta-formulario"/>
+            <PasswordField fx:id="txtNueva"/>
+            <Label text="Repetir contrasenia nueva" styleClass="etiqueta-formulario"/>
+            <PasswordField fx:id="txtRepetir"/>
+            <Button text="Guardar cambios" onAction="#guardar" maxWidth="Infinity"/>
+            <Label fx:id="lblMensaje" styleClass="texto-secundario" wrapText="true"/>
+        </VBox>
+
+        <VBox styleClass="panel-formulario" prefWidth="300" spacing="8">
+            <Label text="Cuenta" styleClass="subtitulo"/>
+            <Label fx:id="lblId"/>
+            <Label fx:id="lblRol"/>
+            <Label fx:id="lblFecha"/>
+            <Separator/>
+            <Label text="Zona de riesgo" styleClass="subtitulo"/>
+            <Label text="Dar de baja la cuenta cierra la sesion y desactiva el acceso."
+                   styleClass="texto-secundario" wrapText="true"/>
+            <Button text="Dar de baja mi cuenta" onAction="#darDeBaja"/>
+        </VBox>
+    </HBox>
+</VBox>

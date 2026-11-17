@@ -39,7 +39,7 @@ public class AlbumDAO extends GenericDAO<Album> {
                 return keys.next() ? keys.getInt(1) : -1;
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al insertar album - " + e.getMessage());
+            throw new ConexionBDException("Error al insertar album", e);
         }
     }
 
@@ -56,7 +56,7 @@ public class AlbumDAO extends GenericDAO<Album> {
             ps.setInt(5, a.getIdAlbum());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al modificar album - " + e.getMessage());
+            throw new ConexionBDException("Error al modificar album", e);
         }
     }
 

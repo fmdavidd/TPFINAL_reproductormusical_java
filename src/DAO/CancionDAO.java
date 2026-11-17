@@ -49,7 +49,7 @@ public class CancionDAO extends GenericDAO<Cancion> {
                 return keys.next() ? keys.getInt(1) : -1;
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al insertar cancion - " + e.getMessage());
+            throw new ConexionBDException("Error al insertar cancion", e);
         }
     }
 
@@ -72,7 +72,7 @@ public class CancionDAO extends GenericDAO<Cancion> {
             ps.setInt(7, c.getIdCancion());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al modificar cancion - " + e.getMessage());
+            throw new ConexionBDException("Error al modificar cancion", e);
         }
     }
 

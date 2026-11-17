@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="Vista.controladores.UsuariosController"
+      spacing="12">
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+
+    <VBox spacing="8" HBox.hgrow="ALWAYS">
+        <Label text="Usuarios" styleClass="titulo-vista"/>
+        <HBox spacing="8">
+            <TextField fx:id="txtBuscar" promptText="Buscar por nombre o email..." HBox.hgrow="ALWAYS"/>
+            <Button text="Buscar" onAction="#buscar"/>
+            <Button text="Limpiar" onAction="#limpiarBusqueda"/>
+            <CheckBox fx:id="chkInactivos" text="Ver inactivos" onAction="#recargar"/>
+        </HBox>
+        <TableView fx:id="tblUsuarios" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colId" text="ID" prefWidth="40"/>
+                <TableColumn fx:id="colNombre" text="Nombre" prefWidth="175"/>
+                <TableColumn fx:id="colEmail" text="Email" prefWidth="200"/>
+                <TableColumn fx:id="colRol" text="Rol" prefWidth="215"/>
+                <TableColumn fx:id="colFecha" text="Alta" prefWidth="120"/>
+                <TableColumn fx:id="colEstado" text="Estado" prefWidth="85"/>
+            </columns>
+        </TableView>
+        <Label fx:id="lblMensaje" styleClass="texto-secundario" wrapText="true"/>
+    </VBox>
+
+    <VBox fx:id="formulario" styleClass="panel-formulario" prefWidth="310" minWidth="310" spacing="6">
+        <Label fx:id="lblFormTitulo" text="Nuevo usuario" styleClass="subtitulo"/>
+        <Label text="Nombre" styleClass="etiqueta-formulario"/>
+        <TextField fx:id="txtNombre"/>
+        <Label text="Email" styleClass="etiqueta-formulario"/>
+        <TextField fx:id="txtEmail"/>
+        <Label text="Tipo de cuenta" styleClass="etiqueta-formulario"/>
+        <ComboBox fx:id="cmbTipo" maxWidth="Infinity"/>
+        <Label text="Nivel de administrador" styleClass="etiqueta-formulario"/>
+        <ComboBox fx:id="cmbNivel" maxWidth="Infinity"/>
+        <CheckBox fx:id="chkPremium" text="Cuenta premium"/>
+        <Label fx:id="lblPassInfo" text="Contrasenia" styleClass="etiqueta-formulario"/>
+        <PasswordField fx:id="txtPass"/>
+        <Separator/>
+        <HBox spacing="6">
+            <Button fx:id="btnGuardar" text="Guardar" onAction="#guardar" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            <Button text="Nuevo" onAction="#nuevo" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        </HBox>
+        <HBox spacing="6">
+            <Button fx:id="btnBaja" text="Dar de baja" onAction="#darDeBaja" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnReactivar" text="Reactivar" onAction="#reactivar" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        </HBox>
+        <Label fx:id="lblInfo" styleClass="texto-secundario" wrapText="true"/>
+    </VBox>
+</HBox>

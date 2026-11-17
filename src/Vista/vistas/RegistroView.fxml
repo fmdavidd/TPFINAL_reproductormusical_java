@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="Vista.controladores.RegistroController"
+            stylesheets="@../estilo/estilos.css">
+    <center>
+        <VBox alignment="CENTER" spacing="10" prefWidth="360">
+            <padding>
+                <Insets top="24" right="24" bottom="24" left="24"/>
+            </padding>
+            <Label text="Crear cuenta" styleClass="titulo-login"/>
+            <Label text="Nombre" alignment="CENTER_LEFT" maxWidth="Infinity"/>
+            <TextField fx:id="txtNombre" promptText="Tu nombre"/>
+            <Label text="Email" maxWidth="Infinity"/>
+            <TextField fx:id="txtEmail" promptText="correo@ejemplo.com"/>
+            <Label text="Contrasenia" maxWidth="Infinity"/>
+            <PasswordField fx:id="txtContrasenia" promptText="Minimo 4 caracteres"/>
+            <Label text="Repetir contrasenia" maxWidth="Infinity"/>
+            <PasswordField fx:id="txtRepetir" promptText="Repetir contrasenia"/>
+            <Label fx:id="lblError" styleClass="texto-error" wrapText="true"/>
+            <Button text="Crear cuenta" onAction="#registrarse" maxWidth="Infinity" defaultButton="true"/>
+            <Button text="Volver al login" onAction="#volver" maxWidth="Infinity"/>
+        </VBox>
+    </center>
+</BorderPane>

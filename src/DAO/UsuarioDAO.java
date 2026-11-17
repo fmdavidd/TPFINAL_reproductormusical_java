@@ -52,7 +52,7 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
                 return keys.next() ? keys.getInt(1) : -1;
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al insertar usuario - " + e.getMessage());
+            throw new ConexionBDException("Error al insertar usuario", e);
         }
     }
 
@@ -70,7 +70,7 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
             ps.setInt(7, u.getIdUsuario());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al modificar usuario - " + e.getMessage());
+            throw new ConexionBDException("Error al modificar usuario", e);
         }
     }
 
@@ -86,7 +86,7 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
             ps.setDate(3, java.sql.Date.valueOf(LocalDate.now()));
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al agregar favorito - " + e.getMessage());
+            throw new ConexionBDException("Error al agregar favorito", e);
         }
     }
 
@@ -98,7 +98,7 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
             ps.setInt(2, idCancion);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al quitar favorito - " + e.getMessage());
+            throw new ConexionBDException("Error al quitar favorito", e);
         }
     }
 
@@ -111,7 +111,7 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
             ps.setString(3, accion);
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al registrar accion - " + e.getMessage());
+            throw new ConexionBDException("Error al registrar accion", e);
         }
     }
 
@@ -138,7 +138,7 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
                 return rs.next();
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al verificar favorito" + " - " + e.getMessage());
+            throw new ConexionBDException("Error al verificar favorito", e);
         }
     }
 
@@ -154,7 +154,7 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
                 }
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al cargar favoritos del usuario " + idUsuario + " - " + e.getMessage());
+            throw new ConexionBDException("Error al cargar favoritos del usuario " + idUsuario, e);
         }
         return ids;
     }
@@ -172,7 +172,7 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
             }
             admin.setRegistroAcciones(registro);
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al cargar acciones del admin " + admin.getIdUsuario() + " - " + e.getMessage());
+            throw new ConexionBDException("Error al cargar acciones del admin " + admin.getIdUsuario(), e);
         }
     }
 

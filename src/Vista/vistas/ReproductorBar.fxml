@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="Vista.controladores.ReproductorBarController"
+      spacing="2" styleClass="barra-reproductor">
+    <padding>
+        <Insets top="6" right="12" bottom="8" left="12"/>
+    </padding>
+    <Slider fx:id="sldProgreso" min="0" max="1" value="0" maxWidth="Infinity"
+            focusTraversable="false" styleClass="barra-progreso"/>
+    <HBox alignment="CENTER_LEFT" spacing="8">
+        <StackPane prefWidth="42" prefHeight="42" minWidth="42" minHeight="42"
+                   maxWidth="42" maxHeight="42" styleClass="portada-barra">
+            <ImageView fx:id="imgPortada" fitWidth="42" fitHeight="42" preserveRatio="true"/>
+            <Label fx:id="lblPortada" text="&#9834;" styleClass="portada-simbolo"/>
+        </StackPane>
+        <Label fx:id="lblActual" text="Sin reproduccion" prefWidth="250"
+               style="-fx-font-weight: bold;"/>
+        <Label fx:id="lblTiempo" text="" prefWidth="100" styleClass="tiempo-barra"/>
+        <Button text="|&lt;" onAction="#anterior"/>
+        <Button fx:id="btnPlay" text="Play" onAction="#alternar" prefWidth="72"/>
+        <Button text="Stop" onAction="#detener"/>
+        <Button text="&gt;|" onAction="#siguiente"/>
+        <Label text="Volumen"/>
+        <Slider fx:id="sldVolumen" min="0" max="100" value="50" prefWidth="110"/>
+        <Label fx:id="lblEstado" text="DETENIDO" styleClass="texto-secundario"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Cola" onAction="#verCola"/>
+    </HBox>
+</VBox>

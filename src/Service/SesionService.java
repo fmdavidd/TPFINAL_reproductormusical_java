@@ -39,6 +39,12 @@ public class SesionService {
         usuarioActual = null;
     }
 
+    // Se usa cuando el usuario modifica sus propios datos: el service reemplaza
+    // la instancia y la sesion tiene que apuntar a la nueva.
+    public void refrescar(Usuario usuario) {
+        usuarioActual = usuario;
+    }
+
     public boolean esAdministrador() {
         return usuarioActual != null && usuarioActual.puedeAdministrar();
     }

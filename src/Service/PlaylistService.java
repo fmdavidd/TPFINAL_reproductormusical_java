@@ -97,6 +97,19 @@ public class PlaylistService {
     }
 
 
+    public void moverCancion(int idPlaylist, int origen, int destino)
+            throws ConexionBDException, ElementoNoEncontradoException {
+        Playlist p = buscarPorId(idPlaylist);
+        p.moverCancion(origen, destino);
+        try {
+            playlistDAO.guardarOrden(idPlaylist, p.getCanciones());
+        } catch (ConexionBDException e) {
+            // Si falla la base, la coleccion en memoria vuelve al orden anterior.
+            p.moverCancion(destino, origen);
+            throw e;
+        }
+    }
+
     public Playlist buscarPorId(int id) throws ElementoNoEncontradoException {
         Playlist p = playlists.get(id);
         if (p == null) {

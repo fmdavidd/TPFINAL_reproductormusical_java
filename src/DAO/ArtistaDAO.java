@@ -42,7 +42,7 @@ public class ArtistaDAO extends GenericDAO<Artista> {
                 }
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al insertar artista - " + e.getMessage());
+            throw new ConexionBDException("Error al insertar artista", e);
         }
         if (id > 0 && a.getGeneros() != null) {
             for (Genero g : a.getGeneros()) {
@@ -63,7 +63,7 @@ public class ArtistaDAO extends GenericDAO<Artista> {
             ps.setInt(3, a.getIdArtista());
             ok = ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al modificar artista - " + e.getMessage());
+            throw new ConexionBDException("Error al modificar artista", e);
         }
 
         // Se regeneran los generos del artista (tabla intermedia, no es baja logica)
@@ -73,7 +73,7 @@ public class ArtistaDAO extends GenericDAO<Artista> {
             ps.setInt(1, a.getIdArtista());
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al borrar generos del artista - " + e.getMessage());
+            throw new ConexionBDException("Error al borrar generos del artista", e);
         }
         if (a.getGeneros() != null) {
             for (Genero g : a.getGeneros()) {
@@ -95,7 +95,7 @@ public class ArtistaDAO extends GenericDAO<Artista> {
                 }
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al buscar artistas - " + e.getMessage());
+            throw new ConexionBDException("Error al buscar artistas", e);
         }
         return lista;
     }
@@ -111,7 +111,7 @@ public class ArtistaDAO extends GenericDAO<Artista> {
             ps.setString(2, genero.name());
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al agregar genero al artista " + idArtista + " - " + e.getMessage());
+            throw new ConexionBDException("Error al agregar genero al artista " + idArtista, e);
         }
     }
 
@@ -127,7 +127,7 @@ public class ArtistaDAO extends GenericDAO<Artista> {
                 }
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al cargar generos del artista " + idArtista + " - " + e.getMessage());
+            throw new ConexionBDException("Error al cargar generos del artista " + idArtista, e);
         }
         return generos;
     }

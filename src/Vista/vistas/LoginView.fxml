@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="Vista.controladores.LoginController"
+      alignment="CENTER" spacing="12" maxWidth="320">
+    <padding>
+        <Insets top="40" right="40" bottom="40" left="40"/>
+    </padding>
+
+    <Label text="REPRODUCTOR MUSICAL" style="-fx-font-size: 22; -fx-font-weight: bold;"/>
+    <TextField fx:id="txtEmail" promptText="Email"/>
+    <PasswordField fx:id="txtContrasenia" promptText="Contrasenia" onAction="#iniciarSesion"/>
+    <Label fx:id="lblError" style="-fx-text-fill: #c0392b;" wrapText="true"/>
+    <Button text="Iniciar sesion" onAction="#iniciarSesion" maxWidth="Infinity" defaultButton="true"/>
+    <Button text="Crear cuenta" onAction="#irARegistro" maxWidth="Infinity"/>
+</VBox>

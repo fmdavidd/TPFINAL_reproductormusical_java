@@ -31,7 +31,7 @@ public abstract class GenericDAO<T> implements IGenericDAO<T> {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al dar de baja en " + getNombreTabla() + " - " + e.getMessage());
+            throw new ConexionBDException("Error al dar de baja en " + getNombreTabla(), e);
         }
     }
 
@@ -44,7 +44,7 @@ public abstract class GenericDAO<T> implements IGenericDAO<T> {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al dar de alta en " + getNombreTabla() + " - " + e.getMessage());
+            throw new ConexionBDException("Error al dar de alta en " + getNombreTabla(), e);
         }
     }
 
@@ -62,7 +62,7 @@ public abstract class GenericDAO<T> implements IGenericDAO<T> {
                 return null;
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al buscar en " + getNombreTabla() + " - " + e.getMessage());
+            throw new ConexionBDException("Error al buscar en " + getNombreTabla(), e);
         }
     }
 
@@ -77,7 +77,7 @@ public abstract class GenericDAO<T> implements IGenericDAO<T> {
                 lista.add(mapear(rs));
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al listar activos de " + getNombreTabla() + " - " + e.getMessage());
+            throw new ConexionBDException("Error al listar activos de " + getNombreTabla(), e);
         }
         return lista;
     }
@@ -93,7 +93,7 @@ public abstract class GenericDAO<T> implements IGenericDAO<T> {
                 lista.add(mapear(rs));
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al listar inactivos de " + getNombreTabla() + " - " + e.getMessage());
+            throw new ConexionBDException("Error al listar inactivos de " + getNombreTabla(), e);
         }
         return lista;
     }

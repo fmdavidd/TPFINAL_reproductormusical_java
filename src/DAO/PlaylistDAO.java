@@ -44,7 +44,7 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
                 }
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al insertar playlist - " + e.getMessage());
+            throw new ConexionBDException("Error al insertar playlist", e);
         }
         if (id > 0 && p.getCanciones() != null) {
             int posicion = 0;
@@ -66,7 +66,7 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
             ps.setInt(4, p.getIdPlaylist());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al modificar playlist - " + e.getMessage());
+            throw new ConexionBDException("Error al modificar playlist", e);
         }
     }
 
@@ -79,7 +79,7 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
             ps.setInt(3, posicion);
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al agregar cancion a la playlist " + idPlaylist + " - " + e.getMessage());
+            throw new ConexionBDException("Error al agregar cancion a la playlist " + idPlaylist, e);
         }
     }
 
@@ -95,7 +95,7 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
             ps.setInt(3, idCancion);
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al reordenar la playlist " + idPlaylist + " - " + e.getMessage());
+            throw new ConexionBDException("Error al reordenar la playlist " + idPlaylist, e);
         }
 
         // 2) se borra el vinculo (tabla intermedia, no es baja logica)
@@ -106,7 +106,36 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
             ps.setInt(2, idCancion);
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al quitar cancion de la playlist " + idPlaylist + " - " + e.getMessage());
+            throw new ConexionBDException("Error al quitar cancion de la playlist " + idPlaylist, e);
+        }
+    }
+
+    // Persiste el orden actual de la playlist reescribiendo la columna posicion
+    // de todos los vinculos en una sola transaccion.
+    public void guardarOrden(int idPlaylist, List<Cancion> canciones) throws ConexionBDException {
+        String sqlBorrar = "DELETE FROM playlist_cancion WHERE id_playlist = ?";
+        String sqlInsertar = "INSERT INTO playlist_cancion (id_playlist, id_cancion, posicion) VALUES (?, ?, ?)";
+        try (Connection con = ConexionBD.getConnection()) {
+            con.setAutoCommit(false);
+            try (PreparedStatement psBorrar = con.prepareStatement(sqlBorrar);
+                 PreparedStatement psInsertar = con.prepareStatement(sqlInsertar)) {
+                psBorrar.setInt(1, idPlaylist);
+                psBorrar.executeUpdate();
+                int posicion = 0;
+                for (Cancion c : canciones) {
+                    psInsertar.setInt(1, idPlaylist);
+                    psInsertar.setInt(2, c.getIdCancion());
+                    psInsertar.setInt(3, posicion++);
+                    psInsertar.addBatch();
+                }
+                psInsertar.executeBatch();
+                con.commit();
+            } catch (SQLException e) {
+                con.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new ConexionBDException("Error al reordenar la playlist " + idPlaylist, e);
         }
     }
 
@@ -125,7 +154,7 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
                 }
             }
         } catch (SQLException e) {
-            throw new ConexionBDException("Error al cargar canciones de la playlist " + idPlaylist + " - " + e.getMessage());
+            throw new ConexionBDException("Error al cargar canciones de la playlist " + idPlaylist, e);
         }
         return canciones;
     }

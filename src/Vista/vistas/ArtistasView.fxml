@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="Vista.controladores.ArtistasController"
+      spacing="12">
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+
+    <VBox spacing="8" HBox.hgrow="ALWAYS">
+        <Label text="Artistas" styleClass="titulo-vista"/>
+        <HBox spacing="8">
+            <TextField fx:id="txtBuscar" promptText="Buscar por nombre..." HBox.hgrow="ALWAYS"/>
+            <Button text="Buscar" onAction="#buscar"/>
+            <Button text="Limpiar" onAction="#limpiarBusqueda"/>
+            <CheckBox fx:id="chkInactivos" text="Ver inactivos" onAction="#recargar"/>
+        </HBox>
+        <TableView fx:id="tblArtistas" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colNombre" text="Nombre" prefWidth="220"/>
+                <TableColumn fx:id="colPais" text="Pais" prefWidth="130"/>
+                <TableColumn fx:id="colGeneros" text="Generos" prefWidth="260"/>
+                <TableColumn fx:id="colEstado" text="Estado" prefWidth="80"/>
+            </columns>
+        </TableView>
+        <HBox spacing="8">
+            <Button text="Reproducir" onAction="#reproducir"/>
+        </HBox>
+        <Label text="Albumes del artista" styleClass="subtitulo"/>
+        <ListView fx:id="lstAlbumes" prefHeight="120"/>
+    </VBox>
+
+    <VBox fx:id="formulario" styleClass="panel-formulario" prefWidth="300" minWidth="300" spacing="6">
+        <Label fx:id="lblFormTitulo" text="Nuevo artista" styleClass="subtitulo"/>
+        <Label text="Nombre" styleClass="etiqueta-formulario"/>
+        <TextField fx:id="txtNombre"/>
+        <Label text="Pais de origen" styleClass="etiqueta-formulario"/>
+        <TextField fx:id="txtPais"/>
+        <Label text="Generos" styleClass="etiqueta-formulario"/>
+        <ListView fx:id="lstGeneros" prefHeight="180"/>
+        <Label text="Usa Ctrl para elegir varios generos." styleClass="texto-secundario" wrapText="true"/>
+        <HBox spacing="6">
+            <Button fx:id="btnGuardar" text="Guardar" onAction="#guardar" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            <Button text="Nuevo" onAction="#nuevo" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        </HBox>
+        <HBox spacing="6">
+            <Button fx:id="btnBaja" text="Dar de baja" onAction="#darDeBaja" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnReactivar" text="Reactivar" onAction="#reactivar" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        </HBox>
+        <Label fx:id="lblMensaje" styleClass="texto-secundario" wrapText="true"/>
+    </VBox>
+</HBox>

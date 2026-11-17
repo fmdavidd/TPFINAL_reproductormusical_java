@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="Vista.controladores.InicioController"
+      spacing="12">
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+
+    <Label fx:id="lblBienvenida" styleClass="titulo-vista" text="Inicio"/>
+    <Label fx:id="lblResumen" styleClass="texto-secundario"/>
+
+    <HBox spacing="16" VBox.vgrow="ALWAYS">
+        <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <Label text="Canciones recientes" styleClass="subtitulo"/>
+            <TableView fx:id="tblRecientes" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colTitulo" text="Titulo" prefWidth="200"/>
+                    <TableColumn fx:id="colArtista" text="Artista" prefWidth="145"/>
+                    <TableColumn fx:id="colAlbum" text="Album" prefWidth="145"/>
+                    <TableColumn fx:id="colDuracion" text="Duracion" prefWidth="85"/>
+                </columns>
+            </TableView>
+            <HBox spacing="8">
+                <Button text="Reproducir" onAction="#reproducirSeleccion"/>
+            </HBox>
+        </VBox>
+
+        <VBox spacing="8" prefWidth="280">
+            <Label text="Playlists para escuchar" styleClass="subtitulo"/>
+            <ListView fx:id="lstPlaylists" VBox.vgrow="ALWAYS"/>
+            <Button text="Reproducir playlist" onAction="#reproducirPlaylist" maxWidth="Infinity"/>
+        </VBox>
+    </HBox>
+</VBox>

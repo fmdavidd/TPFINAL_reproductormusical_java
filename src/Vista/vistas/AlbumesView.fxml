@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="Vista.controladores.AlbumesController"
+      spacing="12">
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+
+    <VBox spacing="8" HBox.hgrow="ALWAYS">
+        <Label text="Albumes" styleClass="titulo-vista"/>
+        <HBox spacing="8">
+            <TextField fx:id="txtBuscar" promptText="Buscar por titulo..." HBox.hgrow="ALWAYS"/>
+            <Button text="Buscar" onAction="#buscar"/>
+            <Button text="Limpiar" onAction="#limpiarBusqueda"/>
+            <CheckBox fx:id="chkInactivos" text="Ver inactivos" onAction="#recargar"/>
+        </HBox>
+        <TableView fx:id="tblAlbumes" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colTitulo" text="Titulo" prefWidth="220"/>
+                <TableColumn fx:id="colArtista" text="Artista" prefWidth="170"/>
+                <TableColumn fx:id="colAnio" text="Anio" prefWidth="70"/>
+                <TableColumn fx:id="colCanciones" text="Canciones" prefWidth="90"/>
+                <TableColumn fx:id="colEstado" text="Estado" prefWidth="80"/>
+            </columns>
+        </TableView>
+        <Label text="Canciones del album" styleClass="subtitulo"/>
+        <ListView fx:id="lstCanciones" prefHeight="140"/>
+        <HBox spacing="8">
+            <Button text="Reproducir" onAction="#reproducir"/>
+            <Button text="Agregar a playlist" onAction="#agregarAPlaylist"/>
+        </HBox>
+    </VBox>
+
+    <VBox fx:id="formulario" styleClass="panel-formulario" prefWidth="320" minWidth="320" spacing="6">
+        <Label fx:id="lblFormTitulo" text="Nuevo album" styleClass="subtitulo"/>
+        <Label text="Titulo" styleClass="etiqueta-formulario"/>
+        <TextField fx:id="txtTitulo"/>
+        <Label text="Anio de lanzamiento" styleClass="etiqueta-formulario"/>
+        <TextField fx:id="txtAnio"/>
+        <Label text="Artista" styleClass="etiqueta-formulario"/>
+        <ComboBox fx:id="cmbArtista" maxWidth="Infinity"/>
+        <Label text="Portada (ruta o URL)" styleClass="etiqueta-formulario"/>
+        <TextField fx:id="txtPortada"/>
+        <Separator/>
+        <Label text="Agregar cancion al album" styleClass="subtitulo"/>
+        <ComboBox fx:id="cmbCancion" maxWidth="Infinity"/>
+        <HBox spacing="8">
+            <Button text="Agregar" onAction="#agregarCancion"/>
+            <Button text="Quitar seleccionada" onAction="#quitarCancion"/>
+        </HBox>
+        <Separator/>
+        <HBox spacing="6">
+            <Button fx:id="btnGuardar" text="Guardar" onAction="#guardar" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            <Button text="Nuevo" onAction="#nuevo" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        </HBox>
+        <HBox spacing="6">
+            <Button fx:id="btnBaja" text="Dar de baja" onAction="#darDeBaja" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnReactivar" text="Reactivar" onAction="#reactivar" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        </HBox>
+        <Label fx:id="lblMensaje" styleClass="texto-secundario" wrapText="true"/>
+    </VBox>
+</HBox>

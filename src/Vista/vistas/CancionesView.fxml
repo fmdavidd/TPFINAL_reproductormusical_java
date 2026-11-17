@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="Vista.controladores.CancionesController"
+      spacing="12">
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+
+    <VBox spacing="8" HBox.hgrow="ALWAYS">
+        <Label text="Canciones" styleClass="titulo-vista"/>
+        <HBox spacing="8">
+            <TextField fx:id="txtBuscar" promptText="Buscar por titulo..." HBox.hgrow="ALWAYS"/>
+            <Button text="Buscar" onAction="#buscar"/>
+            <Button text="Limpiar" onAction="#limpiarBusqueda"/>
+            <CheckBox fx:id="chkInactivas" text="Ver inactivas" onAction="#recargar"/>
+        </HBox>
+        <TableView fx:id="tblCanciones" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colTitulo" text="Titulo" prefWidth="195"/>
+                <TableColumn fx:id="colArtista" text="Artista" prefWidth="130"/>
+                <TableColumn fx:id="colAlbum" text="Album" prefWidth="125"/>
+                <TableColumn fx:id="colGenero" text="Genero" prefWidth="90"/>
+                <TableColumn fx:id="colDuracion" text="Duracion" prefWidth="80"/>
+                <TableColumn fx:id="colEstado" text="Estado" prefWidth="70"/>
+            </columns>
+        </TableView>
+        <HBox spacing="8">
+            <Button text="Reproducir" onAction="#reproducir"/>
+            <Button fx:id="btnFavorito" text="Favorito" onAction="#alternarFavorito"/>
+            <Button fx:id="btnAgregarPlaylist" text="Agregar a playlist" onAction="#agregarAPlaylist"/>
+        </HBox>
+    </VBox>
+
+    <VBox fx:id="formulario" styleClass="panel-formulario" prefWidth="320" minWidth="320" spacing="6">
+        <Label fx:id="lblFormTitulo" text="Nueva cancion" styleClass="subtitulo"/>
+
+        <Label text="Titulo" styleClass="etiqueta-formulario"/>
+        <TextField fx:id="txtTitulo"/>
+        <Label text="Artista" styleClass="etiqueta-formulario"/>
+        <ComboBox fx:id="cmbArtista" maxWidth="Infinity"/>
+        <Label text="Album" styleClass="etiqueta-formulario"/>
+        <ComboBox fx:id="cmbAlbum" maxWidth="Infinity"/>
+        <Label text="Genero" styleClass="etiqueta-formulario"/>
+        <ComboBox fx:id="cmbGenero" maxWidth="Infinity"/>
+        <Label text="Duracion (segundos)" styleClass="etiqueta-formulario"/>
+        <TextField fx:id="txtDuracion"/>
+        <Label text="Ruta del archivo" styleClass="etiqueta-formulario"/>
+        <HBox spacing="4">
+            <TextField fx:id="txtRuta" HBox.hgrow="ALWAYS"/>
+            <Button text="..." onAction="#elegirArchivo"/>
+        </HBox>
+
+        <HBox spacing="6">
+            <Button fx:id="btnGuardar" text="Guardar" onAction="#guardar" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            <Button text="Nueva" onAction="#nueva" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        </HBox>
+        <HBox spacing="6">
+            <Button fx:id="btnBaja" text="Dar de baja" onAction="#darDeBaja" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnReactivar" text="Reactivar" onAction="#reactivar" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        </HBox>
+        <Label fx:id="lblMensaje" styleClass="texto-secundario" wrapText="true"/>
+    </VBox>
+</HBox>

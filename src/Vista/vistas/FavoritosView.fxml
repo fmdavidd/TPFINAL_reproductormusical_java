@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="Vista.controladores.FavoritosController"
+      spacing="8">
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+
+    <Label text="Mis favoritos" styleClass="titulo-vista"/>
+    <Label fx:id="lblResumen" styleClass="texto-secundario"/>
+    <TableView fx:id="tblFavoritos" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colTitulo" text="Titulo" prefWidth="240"/>
+            <TableColumn fx:id="colArtista" text="Artista" prefWidth="180"/>
+            <TableColumn fx:id="colAlbum" text="Album" prefWidth="170"/>
+            <TableColumn fx:id="colGenero" text="Genero" prefWidth="110"/>
+            <TableColumn fx:id="colDuracion" text="Duracion" prefWidth="90"/>
+        </columns>
+    </TableView>
+    <HBox spacing="8">
+        <Button text="Reproducir" onAction="#reproducir"/>
+        <Button text="Quitar de favoritos" onAction="#quitar"/>
+        <Button text="Agregar a playlist" onAction="#agregarAPlaylist"/>
+        <Button text="Actualizar" onAction="#recargar"/>
+    </HBox>
+</VBox>
