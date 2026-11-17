@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
 
 import Excepciones.ConexionBDException;
 import modelo.Cancion;
@@ -76,6 +77,15 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, idPlaylist);
             ps.setInt(2, idCancion);
+            // Puede haber vínculos con canciones inactivas que no aparecen en memoria.
+            // Calcular el final real evita insertar antes de la última canción guardada.
+            try (PreparedStatement ultima = con.prepareStatement(
+                    "SELECT COALESCE(MAX(posicion), -1) + 1 FROM playlist_cancion WHERE id_playlist = ?")) {
+                ultima.setInt(1, idPlaylist);
+                try (ResultSet rs = ultima.executeQuery()) {
+                    if (rs.next()) posicion = rs.getInt(1);
+                }
+            }
             ps.setInt(3, posicion);
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -84,29 +94,86 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
     }
 
     public void quitarCancion(int idPlaylist, int idCancion) throws ConexionBDException {
-        // 1) las canciones que estaban despues bajan una posicion
-        String sqlPosiciones = "UPDATE playlist_cancion SET posicion = posicion - 1 WHERE id_playlist = ? AND posicion > "
-                + "(SELECT posicion FROM (SELECT posicion FROM playlist_cancion "
-                + "WHERE id_playlist = ? AND id_cancion = ?) AS actual)";
-        try (Connection con = ConexionBD.getConnection();
-             PreparedStatement ps = con.prepareStatement(sqlPosiciones)) {
-            ps.setInt(1, idPlaylist);
-            ps.setInt(2, idPlaylist);
-            ps.setInt(3, idCancion);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new ConexionBDException("Error al reordenar la playlist " + idPlaylist + " - " + e.getMessage());
-        }
-
-        // 2) se borra el vinculo (tabla intermedia, no es baja logica)
-        String sqlBorrar = "DELETE FROM playlist_cancion WHERE id_playlist = ? AND id_cancion = ?";
-        try (Connection con = ConexionBD.getConnection();
-             PreparedStatement ps = con.prepareStatement(sqlBorrar)) {
-            ps.setInt(1, idPlaylist);
-            ps.setInt(2, idCancion);
-            ps.executeUpdate();
+        try (Connection con = ConexionBD.getConnection()) {
+            con.setAutoCommit(false);
+            try {
+                int posicion;
+                try (PreparedStatement buscar = con.prepareStatement(
+                        "SELECT posicion FROM playlist_cancion WHERE id_playlist = ? AND id_cancion = ? FOR UPDATE")) {
+                    buscar.setInt(1, idPlaylist); buscar.setInt(2, idCancion);
+                    try (ResultSet rs = buscar.executeQuery()) {
+                        if (!rs.next()) { con.rollback(); return; }
+                        posicion = rs.getInt(1);
+                    }
+                }
+                try (PreparedStatement borrar = con.prepareStatement(
+                        "DELETE FROM playlist_cancion WHERE id_playlist = ? AND id_cancion = ?")) {
+                    borrar.setInt(1, idPlaylist); borrar.setInt(2, idCancion); borrar.executeUpdate();
+                }
+                try (PreparedStatement ordenar = con.prepareStatement(
+                        "UPDATE playlist_cancion SET posicion = posicion - 1 WHERE id_playlist = ? AND posicion > ?")) {
+                    ordenar.setInt(1, idPlaylist); ordenar.setInt(2, posicion); ordenar.executeUpdate();
+                }
+                con.commit();
+            } catch (SQLException e) {
+                try { con.rollback(); } catch (SQLException falloRollback) { e.addSuppressed(falloRollback); }
+                throw e;
+            }
         } catch (SQLException e) {
             throw new ConexionBDException("Error al quitar cancion de la playlist " + idPlaylist + " - " + e.getMessage());
+        }
+    }
+
+    public void reordenarCanciones(int idPlaylist, List<Integer> anterior, List<Integer> nuevoOrden)
+            throws ConexionBDException {
+        if (anterior.size() != nuevoOrden.size() || new HashSet<>(nuevoOrden).size() != nuevoOrden.size()
+                || !new HashSet<>(anterior).equals(new HashSet<>(nuevoOrden)))
+            throw new IllegalArgumentException("El nuevo orden debe contener las mismas canciones, sin duplicados.");
+        try (Connection con = ConexionBD.getConnection()) {
+            con.setAutoCommit(false);
+            try {
+                try (PreparedStatement playlist = con.prepareStatement(
+                        "SELECT id_playlist FROM playlist WHERE id_playlist = ? AND activo = TRUE FOR UPDATE")) {
+                    playlist.setInt(1,idPlaylist);
+                    try (ResultSet rs = playlist.executeQuery()) {
+                        if (!rs.next()) throw new SQLException("La playlist ya no está activa. Actualizá la lista.");
+                    }
+                }
+                List<Integer> todas = new ArrayList<>();
+                List<Integer> visibles = new ArrayList<>();
+                try (PreparedStatement buscar = con.prepareStatement(
+                        "SELECT pc.id_cancion, c.activo FROM playlist_cancion pc "
+                        + "JOIN cancion c ON c.id_cancion = pc.id_cancion "
+                        + "WHERE pc.id_playlist = ? ORDER BY pc.posicion, pc.id_cancion FOR UPDATE")) {
+                    buscar.setInt(1,idPlaylist);
+                    try (ResultSet rs = buscar.executeQuery()) {
+                        while (rs.next()) {
+                            int id = rs.getInt("id_cancion"); todas.add(id);
+                            if (rs.getBoolean("activo")) visibles.add(id);
+                        }
+                    }
+                }
+                if (!visibles.equals(anterior))
+                    throw new SQLException("Las canciones o su orden cambiaron. Actualizá la playlist antes de reordenar.");
+                // Las canciones dadas de baja conservan sus lugares entre las canciones visibles.
+                int siguiente = 0;
+                HashSet<Integer> activas = new HashSet<>(visibles);
+                try (PreparedStatement guardar = con.prepareStatement(
+                        "UPDATE playlist_cancion SET posicion = ? WHERE id_playlist = ? AND id_cancion = ?")) {
+                    for (int i = 0; i < todas.size(); i++) {
+                        int id = todas.get(i);
+                        if (activas.contains(id)) id = nuevoOrden.get(siguiente++);
+                        guardar.setInt(1,i); guardar.setInt(2,idPlaylist); guardar.setInt(3,id);
+                        if (guardar.executeUpdate() != 1) throw new SQLException("No se pudo guardar la posición de una canción.");
+                    }
+                }
+                con.commit();
+            } catch (SQLException e) {
+                try { con.rollback(); } catch (SQLException falloRollback) { e.addSuppressed(falloRollback); }
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new ConexionBDException("No se pudo guardar el orden de la playlist " + idPlaylist + " - " + e.getMessage());
         }
     }
 

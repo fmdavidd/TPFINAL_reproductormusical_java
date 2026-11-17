@@ -10,8 +10,11 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
+import modelo.RegistroAdministrativo;
 import java.util.TreeMap;
 
 import Enumeraciones.NivelAdmin;
@@ -115,6 +118,26 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
         }
     }
 
+    public List<RegistroAdministrativo> listarHistorialAdministrativo() throws ConexionBDException {
+        // No filtrar por activo: las acciones de administradores dados de baja siguen siendo parte del historial.
+        String sql = "SELECT r.id_registro, r.id_admin, r.fecha_hora, r.accion, u.nombre, u.email "
+                + "FROM registro_accion r LEFT JOIN usuario u ON u.id_usuario = r.id_admin "
+                + "ORDER BY r.fecha_hora DESC, r.id_registro DESC";
+        List<RegistroAdministrativo> historial = new ArrayList<>();
+        try (Connection con = ConexionBD.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                historial.add(new RegistroAdministrativo(rs.getInt("id_registro"), rs.getInt("id_admin"),
+                        rs.getString("nombre"), rs.getString("email"),
+                        rs.getTimestamp("fecha_hora").toLocalDateTime(), rs.getString("accion")));
+            }
+        } catch (SQLException e) {
+            throw new ConexionBDException("Error al consultar el historial administrativo - " + e.getMessage());
+        }
+        return historial;
+    }
+
     // Completa los parametros premium y nivel_admin (posicion y posicion + 1).
     // Un usuario normal tiene premium y nivel NULL; un administrador, al reves.
     private void asignarPremiumYNivel(PreparedStatement ps, int posicion, Usuario u) throws SQLException {
@@ -142,21 +165,22 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
         }
     }
 
-    private Set<Integer> cargarFavoritos(int idUsuario) throws ConexionBDException {
-        Set<Integer> ids = new HashSet<>();
-        String sql = "SELECT id_cancion FROM favorito WHERE id_usuario = ?";
+    private Map<Integer,LocalDate> cargarFavoritos(int idUsuario) throws ConexionBDException {
+        Map<Integer,LocalDate> fechas = new HashMap<>();
+        String sql = "SELECT id_cancion, fecha_agregado FROM favorito WHERE id_usuario = ?";
         try (Connection con = ConexionBD.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, idUsuario);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    ids.add(rs.getInt("id_cancion"));
+                    java.sql.Date fecha = rs.getDate("fecha_agregado");
+                    fechas.put(rs.getInt("id_cancion"),fecha == null ? null : fecha.toLocalDate());
                 }
             }
         } catch (SQLException e) {
             throw new ConexionBDException("Error al cargar favoritos del usuario " + idUsuario + " - " + e.getMessage());
         }
-        return ids;
+        return fechas;
     }
 
     private void cargarRegistroAcciones(UsuarioAdministrador admin) throws ConexionBDException {
@@ -200,10 +224,11 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
         u.setFechaRegistro(rs.getDate("fecha_registro").toLocalDate());
 
         if (u instanceof UsuarioNormal) {
-            ((UsuarioNormal) u).setFavoritos(cargarFavoritos(u.getIdUsuario()));
+            ((UsuarioNormal) u).setFavoritos(java.util.Collections.emptySet());
+            ((UsuarioNormal) u).setFechasFavoritos(cargarFavoritos(u.getIdUsuario()));
         } else {
             cargarRegistroAcciones((UsuarioAdministrador) u);
         }
         return u;
     }
-}
+}

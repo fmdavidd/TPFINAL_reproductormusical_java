@@ -13,6 +13,15 @@ import Excepciones.ElementoNoEncontradoException;
 import modelo.Cancion;
 
 public class CancionService {
+    private SesionService sesion;
+
+    public void setSesion(SesionService sesion) { this.sesion = sesion; }
+
+    private void exigirEdicionContenido() {
+        if (sesion == null) throw new Excepciones.PermisoDenegadoException("No hay sesión autorizada.");
+        sesion.exigirEdicionContenido();
+    }
+
 
     private CancionDAO cancionDAO = new CancionDAO();
 
@@ -26,6 +35,7 @@ public class CancionService {
 
 
     public void alta(Cancion c) throws ConexionBDException, ElementoDuplicadoException {
+        exigirEdicionContenido();
         validarDuplicado(c);
         int id = cancionDAO.insertar(c);
         if (id <= 0) {
@@ -33,32 +43,40 @@ public class CancionService {
         }
         c.setIdCancion(id);
         canciones.put(id, c);
+        sesion.registrarAccion("Creó canción ID " + id);
     }
 
     public void modificar(Cancion c)
             throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException {
+        exigirEdicionContenido();
         buscarPorId(c.getIdCancion());
         validarDuplicado(c);
         if (!cancionDAO.modificar(c)) {
             throw new ElementoNoEncontradoException("La cancion " + c.getIdCancion() + " no existe en la base");
         }
         canciones.put(c.getIdCancion(), c);
+        sesion.registrarAccion("Modificó canción ID " + c.getIdCancion());
     }
 
     public void baja(int id) throws ConexionBDException, ElementoNoEncontradoException {
+        exigirEdicionContenido();
         buscarPorId(id);
-        cancionDAO.darDeBaja(id);
+        if (!cancionDAO.darDeBaja(id)) throw new ElementoNoEncontradoException("No existe el registro " + id);
         canciones.remove(id);
+        sesion.registrarAccion("Dio de baja canción ID " + id);
     }
 
 
     // Lista las canciones dadas de baja (activo = FALSE) para poder elegir cual reactivar.
     public List<Cancion> listarInactivos() throws ConexionBDException {
+        if (sesion == null) throw new Excepciones.PermisoDenegadoException("No hay sesión autorizada.");
+        sesion.exigirAdministrador();
         return cancionDAO.listarInactivos();
     }
 
     public void reactivar(int id)
             throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException {
+        exigirEdicionContenido();
         if (canciones.containsKey(id)) {
             throw new ElementoDuplicadoException("La cancion " + id + " ya esta activa");
         }
@@ -73,9 +91,10 @@ public class CancionService {
             throw new ElementoNoEncontradoException("El album de la cancion esta dado de baja: reactivalo primero");
         }
         validarDuplicado(c);
-        cancionDAO.darDeAlta(id);
+        if (!cancionDAO.darDeAlta(id)) throw new ElementoNoEncontradoException("No existe el registro " + id);
         c.setActivo(true);
         canciones.put(id, c);
+        sesion.registrarAccion("Reactivó canción ID " + id);
     }
 
 
@@ -111,6 +130,12 @@ public class CancionService {
         return resultado;
     }
 
+
+    public void recargar() throws ConexionBDException {
+        List<Cancion> nuevos = cancionDAO.listarActivos();
+        canciones.clear();
+        for (Cancion item : nuevos) canciones.put(item.getIdCancion(), item);
+    }
 
     private void validarDuplicado(Cancion c) throws ElementoDuplicadoException {
         for (Cancion otra : canciones.values()) {

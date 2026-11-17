@@ -7,10 +7,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 
 public class UsuarioNormal extends Usuario {
     private boolean premium;
     private Set<Integer> favoritos;
+    private Map<Integer,LocalDate> fechasFavoritos = new HashMap<>();
     private List<Playlist> playlists = new ArrayList<Playlist>();
 
     public UsuarioNormal(){
@@ -43,14 +46,28 @@ public class UsuarioNormal extends Usuario {
 
     public void setFavoritos(Set<Integer> favoritos) {
         this.favoritos = new HashSet<Integer>(favoritos);
+        fechasFavoritos.keySet().retainAll(favoritos);
     }
 
+    public Map<Integer,LocalDate> getFechasFavoritos() { return new HashMap<>(fechasFavoritos); }
+
+    public void setFechasFavoritos(Map<Integer,LocalDate> fechas) {
+        fechasFavoritos = new HashMap<>(fechas);
+        favoritos.addAll(fechas.keySet());
+    }
+
+    public LocalDate getFechaFavorito(int idCancion) { return fechasFavoritos.get(idCancion); }
+
     public boolean agregarFavorito(int idCancion) {
-        return favoritos.add(idCancion);
+        if (!favoritos.add(idCancion)) return false;
+        fechasFavoritos.put(idCancion,LocalDate.now());
+        return true;
     }
 
     public boolean quitarFavorito(int idCancion) {
-        return favoritos.remove(idCancion);
+        if (!favoritos.remove(idCancion)) return false;
+        fechasFavoritos.remove(idCancion);
+        return true;
     }
 
     public boolean esFavorita(int idCancion) {

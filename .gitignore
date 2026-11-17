@@ -27,3 +27,8 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+# Maven
+target/
+*.iml
+.idea/modules.xml
+.idea/libraries/

@@ -94,6 +94,12 @@ public class Playlist implements Reproducible {
         return total;
     }
 
+    public String getDuracionFormateada() {
+        int total = getDuracionTotal();
+        if (total >= 3600) return String.format("%d:%02d:%02d", total / 3600, (total % 3600) / 60, total % 60);
+        return String.format("%d:%02d", total / 60, total % 60);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

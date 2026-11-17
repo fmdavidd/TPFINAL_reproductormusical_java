@@ -12,6 +12,15 @@ import Excepciones.ElementoNoEncontradoException;
 import modelo.Artista;
 
 public class ArtistaService {
+    private SesionService sesion;
+
+    public void setSesion(SesionService sesion) { this.sesion = sesion; }
+
+    private void exigirEdicionContenido() {
+        if (sesion == null) throw new Excepciones.PermisoDenegadoException("No hay sesión autorizada.");
+        sesion.exigirEdicionContenido();
+    }
+
 
     private ArtistaDAO artistaDAO = new ArtistaDAO();
 
@@ -26,6 +35,7 @@ public class ArtistaService {
 
 
     public void alta(Artista a) throws ConexionBDException, ElementoDuplicadoException {
+        exigirEdicionContenido();
         validarDuplicado(a);
         int id = artistaDAO.insertar(a);
         if (id <= 0) {
@@ -33,31 +43,39 @@ public class ArtistaService {
         }
         a.setIdArtista(id);
         artistas.put(id, a);
+        sesion.registrarAccion("Creó artista ID " + id);
     }
 
     public void modificar(Artista a)
             throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException {
+        exigirEdicionContenido();
         buscarPorId(a.getIdArtista());
         validarDuplicado(a);
         if (!artistaDAO.modificar(a)) {
             throw new ElementoNoEncontradoException("El artista " + a.getIdArtista() + " no existe en la base");
         }
         artistas.put(a.getIdArtista(), a);
+        sesion.registrarAccion("Modificó artista ID " + a.getIdArtista());
     }
 
     public void baja(int id) throws ConexionBDException, ElementoNoEncontradoException {
+        exigirEdicionContenido();
         buscarPorId(id);
-        artistaDAO.darDeBaja(id);
+        if (!artistaDAO.darDeBaja(id)) throw new ElementoNoEncontradoException("No existe el registro " + id);
         artistas.remove(id);
+        sesion.registrarAccion("Dio de baja artista ID " + id);
     }
 
 
     public List<Artista> listarInactivos() throws ConexionBDException {
+        if (sesion == null) throw new Excepciones.PermisoDenegadoException("No hay sesión autorizada.");
+        sesion.exigirAdministrador();
         return artistaDAO.listarInactivos();
     }
 
     public void reactivar(int id)
             throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException {
+        exigirEdicionContenido();
         if (artistas.containsKey(id)) {
             throw new ElementoDuplicadoException("El artista " + id + " ya esta activo");
         }
@@ -66,9 +84,10 @@ public class ArtistaService {
             throw new ElementoNoEncontradoException("No existe el artista con id " + id);
         }
         validarDuplicado(a);
-        artistaDAO.darDeAlta(id);
+        if (!artistaDAO.darDeAlta(id)) throw new ElementoNoEncontradoException("No existe el registro " + id);
         a.setActivo(true);
         artistas.put(id, a);
+        sesion.registrarAccion("Reactivó artista ID " + id);
     }
 
 
@@ -94,6 +113,12 @@ public class ArtistaService {
         return resultado;
     }
 
+
+    public void recargar() throws ConexionBDException {
+        List<Artista> nuevos = artistaDAO.listarActivos();
+        artistas.clear();
+        for (Artista item : nuevos) artistas.put(item.getIdArtista(), item);
+    }
 
     private void validarDuplicado(Artista a) throws ElementoDuplicadoException {
         for (Artista otro : artistas.values()) {
