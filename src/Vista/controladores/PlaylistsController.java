@@ -82,6 +82,7 @@ public class PlaylistsController {
 
         recargar();
         nueva();
+        aplicarDestino();
     }
 
     @FXML
@@ -108,6 +109,16 @@ public class PlaylistsController {
                 return;
             }
         }
+    }
+
+    private void aplicarDestino() {
+        ContextoNavegacion.Destino destino = ContextoNavegacion.consumir(ContextoNavegacion.Tipo.PLAYLIST);
+        if (destino == null) {
+            return;
+        }
+        txtBuscar.setText(destino.getTexto());
+        recargar();
+        seleccionar(destino.getId());
     }
 
     private void mostrar(Playlist playlist) {

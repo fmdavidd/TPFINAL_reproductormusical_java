@@ -19,6 +19,7 @@
             <Label fx:id="lblRol" styleClass="texto-secundario" wrapText="true"/>
             <Separator/>
             <Button text="Inicio" onAction="#inicio" maxWidth="Infinity"/>
+            <Button text="Buscar" onAction="#buscar" maxWidth="Infinity"/>
             <Button text="Canciones" onAction="#canciones" maxWidth="Infinity"/>
             <Button text="Artistas" onAction="#artistas" maxWidth="Infinity"/>
             <Button text="Albumes" onAction="#albumes" maxWidth="Infinity"/>

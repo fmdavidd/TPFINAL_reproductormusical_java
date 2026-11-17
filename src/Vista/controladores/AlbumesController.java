@@ -81,6 +81,7 @@ public class AlbumesController {
 
         recargar();
         nuevo();
+        aplicarDestino();
     }
 
     private int contarCanciones(Album album) {
@@ -133,6 +134,16 @@ public class AlbumesController {
                 return;
             }
         }
+    }
+
+    private void aplicarDestino() {
+        ContextoNavegacion.Destino destino = ContextoNavegacion.consumir(ContextoNavegacion.Tipo.ALBUM);
+        if (destino == null) {
+            return;
+        }
+        txtBuscar.setText(destino.getTexto());
+        recargar();
+        seleccionar(destino.getId());
     }
 
     private void mostrar(Album album) {

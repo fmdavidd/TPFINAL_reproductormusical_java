@@ -10,6 +10,8 @@ import javafx.scene.layout.Pane;
 
 public final class Navegacion {
 
+    private static Pane contenedorActual;
+
     private Navegacion() {
     }
 
@@ -20,11 +22,21 @@ public final class Navegacion {
 
     // Carga una seccion dentro del panel central del menu principal.
     public static void mostrarEn(Pane contenedor, String nombreVista) {
+        contenedorActual = contenedor;
         try {
             contenedor.getChildren().setAll(cargar(nombreVista));
         } catch (IOException e) {
             Ui.error("No se pudo abrir la vista", e.getMessage());
         }
+    }
+
+    // Cambia la seccion dentro del menu principal que esta abierto.
+    public static void mostrarEnActual(String nombreVista) {
+        if (contenedorActual == null) {
+            Ui.error("No se pudo abrir la vista", "No hay un menu principal activo");
+            return;
+        }
+        mostrarEn(contenedorActual, nombreVista);
     }
 
     // Cambia toda la ventana (login, registro, menu).

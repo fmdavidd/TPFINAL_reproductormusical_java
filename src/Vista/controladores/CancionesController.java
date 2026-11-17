@@ -99,6 +99,7 @@ public class CancionesController {
         cargarAlbumes(0);
         recargar();
         nueva();
+        aplicarDestino();
     }
 
     private void cargarArtistas() {
@@ -158,6 +159,16 @@ public class CancionesController {
                 return;
             }
         }
+    }
+
+    private void aplicarDestino() {
+        ContextoNavegacion.Destino destino = ContextoNavegacion.consumir(ContextoNavegacion.Tipo.CANCION);
+        if (destino == null) {
+            return;
+        }
+        txtBuscar.setText(destino.getTexto());
+        recargar();
+        seleccionar(destino.getId());
     }
 
     private void mostrar(Cancion cancion) {

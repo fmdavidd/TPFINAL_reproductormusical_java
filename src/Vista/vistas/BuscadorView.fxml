@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="Vista.controladores.BuscadorController"
+      spacing="8">
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+
+    <Label text="Buscar" styleClass="titulo-vista"/>
+    <HBox spacing="8">
+        <TextField fx:id="txtBuscar" promptText="Buscar canciones, albumes, playlists o artistas..."
+                   HBox.hgrow="ALWAYS"/>
+        <ComboBox fx:id="cmbGenero" prefWidth="160"/>
+        <Button text="Buscar" onAction="#buscar"/>
+        <Button text="Limpiar" onAction="#limpiarBusqueda"/>
+    </HBox>
+    <Label fx:id="lblResultados" text="0 resultados" styleClass="texto-secundario"/>
+    <TableView fx:id="tblResultados" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colTipo" text="Tipo" prefWidth="90"/>
+            <TableColumn fx:id="colTitulo" text="Titulo" prefWidth="220"/>
+            <TableColumn fx:id="colDetalle" text="Detalle" prefWidth="360"/>
+            <TableColumn fx:id="colGeneros" text="Generos" prefWidth="220"/>
+        </columns>
+    </TableView>
+    <HBox spacing="8">
+        <Button fx:id="btnAbrir" text="Abrir seccion" onAction="#abrirSeleccionado"/>
+    </HBox>
+</VBox>

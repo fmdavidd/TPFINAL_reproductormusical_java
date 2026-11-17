@@ -76,6 +76,7 @@ public class ArtistasController {
 
         recargar();
         nuevo();
+        aplicarDestino();
     }
 
     private String textoGeneros(java.util.Set<Genero> generos) {
@@ -127,6 +128,16 @@ public class ArtistasController {
                 return;
             }
         }
+    }
+
+    private void aplicarDestino() {
+        ContextoNavegacion.Destino destino = ContextoNavegacion.consumir(ContextoNavegacion.Tipo.ARTISTA);
+        if (destino == null) {
+            return;
+        }
+        txtBuscar.setText(destino.getTexto());
+        recargar();
+        seleccionar(destino.getId());
     }
 
     private void mostrar(Artista artista) {

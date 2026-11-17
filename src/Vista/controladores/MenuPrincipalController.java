@@ -47,6 +47,11 @@ public class MenuPrincipalController {
     }
 
     @FXML
+    private void buscar() {
+        Navegacion.mostrarEn(contenido, "BuscadorView");
+    }
+
+    @FXML
     private void canciones() {
         Navegacion.mostrarEn(contenido, "CancionesView");
     }
