@@ -13,6 +13,15 @@ import modelo.Album;
 import modelo.Cancion;
 
 public class AlbumService {
+    private SesionService sesion;
+
+    public void setSesion(SesionService sesion) { this.sesion = sesion; }
+
+    private void exigirEdicionContenido() {
+        if (sesion == null) throw new Excepciones.PermisoDenegadoException("No hay sesión autorizada.");
+        sesion.exigirEdicionContenido();
+    }
+
 
     private AlbumDAO albumDAO = new AlbumDAO();
     private CancionService cancionService;
@@ -28,6 +37,7 @@ public class AlbumService {
 
 
     public void alta(Album a) throws ConexionBDException, ElementoDuplicadoException {
+        exigirEdicionContenido();
         validarDuplicado(a);
         int id = albumDAO.insertar(a);
         if (id <= 0) {
@@ -35,31 +45,39 @@ public class AlbumService {
         }
         a.setIdAlbum(id);
         albumes.put(id, a);
+        sesion.registrarAccion("Creó álbum ID " + id);
     }
 
     public void modificar(Album a)
             throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException {
+        exigirEdicionContenido();
         buscarPorId(a.getIdAlbum());
         validarDuplicado(a);
         if (!albumDAO.modificar(a)) {
             throw new ElementoNoEncontradoException("El album " + a.getIdAlbum() + " no existe en la base");
         }
         albumes.put(a.getIdAlbum(), a);
+        sesion.registrarAccion("Modificó álbum ID " + a.getIdAlbum());
     }
 
     public void baja(int id) throws ConexionBDException, ElementoNoEncontradoException {
+        exigirEdicionContenido();
         buscarPorId(id);
-        albumDAO.darDeBaja(id);
+        if (!albumDAO.darDeBaja(id)) throw new ElementoNoEncontradoException("No existe el registro " + id);
         albumes.remove(id);
+        sesion.registrarAccion("Dio de baja álbum ID " + id);
     }
 
 
     public List<Album> listarInactivos() throws ConexionBDException {
+        if (sesion == null) throw new Excepciones.PermisoDenegadoException("No hay sesión autorizada.");
+        sesion.exigirAdministrador();
         return albumDAO.listarInactivos();
     }
 
     public void reactivar(int id)
             throws ConexionBDException, ElementoNoEncontradoException, ElementoDuplicadoException {
+        exigirEdicionContenido();
         if (albumes.containsKey(id)) {
             throw new ElementoDuplicadoException("El album " + id + " ya esta activo");
         }
@@ -71,9 +89,10 @@ public class AlbumService {
             throw new ElementoNoEncontradoException("El artista del album esta dado de baja: reactivalo primero");
         }
         validarDuplicado(a);
-        albumDAO.darDeAlta(id);
+        if (!albumDAO.darDeAlta(id)) throw new ElementoNoEncontradoException("No existe el registro " + id);
         a.setActivo(true);
         albumes.put(id, a);
+        sesion.registrarAccion("Reactivó álbum ID " + id);
     }
 
 
@@ -110,6 +129,12 @@ public class AlbumService {
         return resultado;
     }
 
+
+    public void recargar() throws ConexionBDException {
+        List<Album> nuevos = albumDAO.listarActivos();
+        albumes.clear();
+        for (Album item : nuevos) albumes.put(item.getIdAlbum(), item);
+    }
 
     private void validarDuplicado(Album a) throws ElementoDuplicadoException {
         for (Album otro : albumes.values()) {
