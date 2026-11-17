@@ -23,7 +23,6 @@
             <TextField fx:id="txtNombre"/>
             <Label text="Email" styleClass="etiqueta-formulario"/>
             <TextField fx:id="txtEmail"/>
-            <CheckBox fx:id="chkPremium" text="Cuenta premium"/>
             <Separator/>
             <Label text="Cambiar contrasenia (opcional)" styleClass="subtitulo"/>
             <Label text="Contrasenia actual" styleClass="etiqueta-formulario"/>

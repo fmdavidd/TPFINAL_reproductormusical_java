@@ -177,7 +177,22 @@ public class PlaylistsController {
         aplicarPermisos(puedeCrear);
         btnEliminar.setDisable(true);
         lblMensaje.setText("");
+        actualizarCupoPlaylists();
         tblPlaylists.getSelectionModel().clearSelection();
+    }
+
+    private void actualizarCupoPlaylists() {
+        Usuario usuario = Reglas.usuario();
+        if (!(usuario instanceof UsuarioNormal)) {
+            return;
+        }
+        if (Reglas.esPremium()) {
+            lblMensaje.setText("Cuenta premium: playlists ilimitadas.");
+            return;
+        }
+        int usadas = App.getPlaylists().listarPorUsuario(usuario.getIdUsuario()).size();
+        lblMensaje.setText("Cuenta gratuita: usadas " + usadas + " de "
+                + Reglas.LIMITE_PLAYLISTS_SIN_PREMIUM + " playlists.");
     }
 
     @FXML
@@ -205,6 +220,11 @@ public class PlaylistsController {
             Usuario usuario = Reglas.usuario();
             if (!(usuario instanceof UsuarioNormal)) {
                 lblMensaje.setText("Solo los usuarios normales pueden crear playlists.");
+                return;
+            }
+            if (!Reglas.puedeCrearPlaylist()) {
+                lblMensaje.setText(Reglas.mensajeLimitePlaylists());
+                Ui.error("Nueva playlist", Reglas.mensajeLimitePlaylists());
                 return;
             }
             Playlist nueva = new Playlist(nombre, descripcion, chkPublica.isSelected(),

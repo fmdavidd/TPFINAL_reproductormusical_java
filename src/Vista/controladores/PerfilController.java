@@ -4,7 +4,6 @@ import Vista.App;
 
 import Seguridad.Seguridad;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -17,7 +16,6 @@ public class PerfilController {
     @FXML private Label lblResumen;
     @FXML private TextField txtNombre;
     @FXML private TextField txtEmail;
-    @FXML private CheckBox chkPremium;
     @FXML private PasswordField txtActual;
     @FXML private PasswordField txtNueva;
     @FXML private PasswordField txtRepetir;
@@ -41,13 +39,14 @@ public class PerfilController {
         txtNombre.setText(usuario.getNombre());
         txtEmail.setText(usuario.getEmail());
 
-        chkPremium.setVisible(usuario instanceof UsuarioNormal);
-        chkPremium.setManaged(usuario instanceof UsuarioNormal);
         if (usuario instanceof UsuarioNormal) {
-            chkPremium.setSelected(((UsuarioNormal) usuario).esPremium());
-            lblResumen.setText("Favoritos: " + ((UsuarioNormal) usuario).getFavoritos().size()
-                    + "  |  Playlists: "
-                    + App.getPlaylists().listarPorUsuario(usuario.getIdUsuario()).size());
+            UsuarioNormal normal = (UsuarioNormal) usuario;
+            int playlists = App.getPlaylists().listarPorUsuario(usuario.getIdUsuario()).size();
+            String cupo = normal.esPremium()
+                    ? playlists + " (ilimitadas)"
+                    : playlists + "/" + Reglas.LIMITE_PLAYLISTS_SIN_PREMIUM;
+            lblResumen.setText("Favoritos: " + normal.getFavoritos().size()
+                    + "  |  Playlists: " + cupo);
         } else {
             lblResumen.setText("Cuenta administrativa");
         }
@@ -85,9 +84,6 @@ public class PerfilController {
 
         usuario.setNombre(nombre);
         usuario.setEmail(email);
-        if (usuario instanceof UsuarioNormal) {
-            ((UsuarioNormal) usuario).setPremium(chkPremium.isSelected());
-        }
         if (cambiaContrasenia) {
             String salt = Seguridad.generarSalt();
             usuario.setSalt(salt);

@@ -14,6 +14,8 @@ import modelo.UsuarioNormal;
 // capa de vista para no modificar los services.
 public final class Reglas {
 
+    public static final int LIMITE_PLAYLISTS_SIN_PREMIUM = 3;
+
     private Reglas() {
     }
 
@@ -59,6 +61,29 @@ public final class Reglas {
 
     public static boolean puedeModificarPlaylist(Playlist playlist) {
         return playlist != null && (esPropietario(playlist) || puedeEditarContenido());
+    }
+
+    public static boolean esPremium() {
+        Usuario u = usuario();
+        return u instanceof UsuarioNormal && ((UsuarioNormal) u).esPremium();
+    }
+
+    public static boolean puedeCrearPlaylist() {
+        Usuario u = usuario();
+        if (!(u instanceof UsuarioNormal)) {
+            return false;
+        }
+        UsuarioNormal normal = (UsuarioNormal) u;
+        if (normal.esPremium()) {
+            return true;
+        }
+        return App.getPlaylists().listarPorUsuario(normal.getIdUsuario()).size()
+                < LIMITE_PLAYLISTS_SIN_PREMIUM;
+    }
+
+    public static String mensajeLimitePlaylists() {
+        return "Las cuentas no premium pueden crear hasta " + LIMITE_PLAYLISTS_SIN_PREMIUM
+                + " playlists. Las cuentas premium pueden crear playlists ilimitadas.";
     }
 
     public static String descripcionRol() {
