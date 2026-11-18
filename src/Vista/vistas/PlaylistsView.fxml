@@ -18,8 +18,9 @@
             <TextField fx:id="txtBuscar" promptText="Buscar playlist..." HBox.hgrow="ALWAYS"/>
             <Button text="Buscar" onAction="#buscar"/>
             <Button text="Limpiar" onAction="#limpiarBusqueda"/>
+            <CheckBox fx:id="chkSoloMias" text="Solo mis playlists" onAction="#recargar"/>
         </HBox>
-        <TableView fx:id="tblPlaylists" prefHeight="190" VBox.vgrow="ALWAYS">
+        <TableView fx:id="tblPlaylists" minHeight="180" prefHeight="280" VBox.vgrow="ALWAYS">
             <columns>
                 <TableColumn fx:id="colNombre" text="Nombre" prefWidth="200"/>
                 <TableColumn fx:id="colPropietario" text="Propietario" prefWidth="140"/>
@@ -30,7 +31,7 @@
         </TableView>
 
         <Label fx:id="lblPlaylist" text="Canciones de la playlist" styleClass="subtitulo"/>
-        <ListView fx:id="lstCanciones" VBox.vgrow="ALWAYS"/>
+        <ListView fx:id="lstCanciones" minHeight="100" prefHeight="180" VBox.vgrow="ALWAYS"/>
         <HBox spacing="8">
             <Button text="Reproducir" onAction="#reproducir"/>
             <Button fx:id="btnSubir" text="Subir" onAction="#subir"/>

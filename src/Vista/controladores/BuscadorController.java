@@ -13,7 +13,10 @@ import java.util.Set;
 import Enumeraciones.Genero;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.CustomMenuItem;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -28,7 +31,7 @@ import modelo.Playlist;
 public class BuscadorController {
 
     @FXML private TextField txtBuscar;
-    @FXML private ComboBox<String> cmbGenero;
+    @FXML private MenuButton menuGeneros;
     @FXML private TableView<Object> tblResultados;
     @FXML private TableColumn<Object, String> colTipo;
     @FXML private TableColumn<Object, String> colTitulo;
@@ -38,6 +41,7 @@ public class BuscadorController {
     @FXML private Button btnAbrir;
 
     private Map<Integer, List<Cancion>> cancionesPorAlbum = new LinkedHashMap<Integer, List<Cancion>>();
+    private final Map<Genero, CheckBox> opcionesGeneros = new LinkedHashMap<>();
 
     @FXML
     private void initialize() {
@@ -47,11 +51,16 @@ public class BuscadorController {
         Ui.configurar(colDetalle, this::detalleDe);
         Ui.configurar(colGeneros, this::generosDe);
 
-        cmbGenero.getItems().setAll("Todos");
+        MenuItem todos = new MenuItem("Todos los generos");
+        todos.setOnAction(evento -> limpiarGeneros());
+        menuGeneros.getItems().add(todos);
         for (Genero genero : Genero.values()) {
-            cmbGenero.getItems().add(genero.name());
+            CheckBox opcion = new CheckBox(genero.name());
+            opcion.selectedProperty().addListener((obs, anterior, nuevo) -> actualizarTextoGeneros());
+            opcionesGeneros.put(genero, opcion);
+            menuGeneros.getItems().add(new CustomMenuItem(opcion, false));
         }
-        cmbGenero.getSelectionModel().selectFirst();
+        actualizarTextoGeneros();
 
         tblResultados.getSelectionModel().selectedItemProperty().addListener(
                 (obs, anterior, nuevo) -> btnAbrir.setDisable(nuevo == null));
@@ -78,7 +87,7 @@ public class BuscadorController {
     @FXML
     private void limpiarBusqueda() {
         txtBuscar.clear();
-        cmbGenero.getSelectionModel().selectFirst();
+        limpiarGeneros();
         recargar();
     }
 
@@ -123,25 +132,39 @@ public class BuscadorController {
     private void recargar() {
         actualizarIndices();
         String consulta = txtBuscar.getText() == null ? "" : txtBuscar.getText().trim();
-        Genero genero = generoSeleccionado();
+        Set<Genero> generos = generosSeleccionados();
 
         List<Object> resultados = new ArrayList<Object>();
-        resultados.addAll(buscadorCanciones().buscar(consulta, genero));
-        resultados.addAll(buscadorAlbumes().buscar(consulta, genero));
-        resultados.addAll(buscadorPlaylists().buscar(consulta, genero));
-        resultados.addAll(buscadorArtistas().buscar(consulta, genero));
+        resultados.addAll(buscadorCanciones().buscarPorGeneros(consulta, generos));
+        resultados.addAll(buscadorAlbumes().buscarPorGeneros(consulta, generos));
+        resultados.addAll(buscadorPlaylists().buscarPorGeneros(consulta, generos));
+        resultados.addAll(buscadorArtistas().buscarPorGeneros(consulta, generos));
 
         tblResultados.getItems().setAll(resultados);
         lblResultados.setText(resultados.size() + (resultados.size() == 1
                 ? " resultado" : " resultados"));
     }
 
-    private Genero generoSeleccionado() {
-        String valor = cmbGenero.getValue();
-        if (valor == null || "Todos".equals(valor)) {
-            return null;
-        }
-        return Genero.valueOf(valor);
+    private Set<Genero> generosSeleccionados() {
+        Set<Genero> seleccionados = new HashSet<>();
+        opcionesGeneros.forEach((genero, opcion) -> {
+            if (opcion.isSelected()) {
+                seleccionados.add(genero);
+            }
+        });
+        return seleccionados;
+    }
+
+    private void limpiarGeneros() {
+        opcionesGeneros.values().forEach(opcion -> opcion.setSelected(false));
+        actualizarTextoGeneros();
+    }
+
+    private void actualizarTextoGeneros() {
+        Set<Genero> seleccionados = generosSeleccionados();
+        menuGeneros.setText(seleccionados.isEmpty() ? "Todos los generos"
+                : seleccionados.size() == 1 ? seleccionados.iterator().next().name()
+                : seleccionados.size() + " generos seleccionados");
     }
 
     private Buscador<Cancion> buscadorCanciones() {

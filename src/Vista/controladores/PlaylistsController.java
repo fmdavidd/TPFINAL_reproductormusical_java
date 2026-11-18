@@ -25,6 +25,7 @@ import modelo.UsuarioNormal;
 public class PlaylistsController {
 
     @FXML private TextField txtBuscar;
+    @FXML private CheckBox chkSoloMias;
     @FXML private TableView<Playlist> tblPlaylists;
     @FXML private TableColumn<Playlist, String> colNombre;
     @FXML private TableColumn<Playlist, String> colPropietario;
@@ -62,7 +63,7 @@ public class PlaylistsController {
         Ui.configurar(colPublica, p -> p.isPublica() ? "Si" : "No");
 
         cmbCancion.setConverter(Ui.conversor(Ui::textoCancion));
-        lstCanciones.setCellFactory(lv -> Ui.celda(Ui::textoCancion));
+        Ui.marcarCancionActual(lstCanciones);
         lstCanciones.setOnMouseClicked(evento -> {
             if (evento.getClickCount() == 2) {
                 reproducir();
@@ -92,6 +93,7 @@ public class PlaylistsController {
         List<Playlist> playlists = new ArrayList<>();
         for (Playlist playlist : App.getPlaylists().listar()) {
             if (Reglas.puedeVerPlaylist(playlist)
+                    && (!chkSoloMias.isSelected() || Reglas.esPropietario(playlist))
                     && (texto.isEmpty() || playlist.getNombre().toLowerCase().contains(texto))) {
                 playlists.add(playlist);
             }
@@ -177,6 +179,7 @@ public class PlaylistsController {
 
     @FXML
     private void nueva() {
+        tblPlaylists.getSelectionModel().clearSelection();
         seleccionada = null;
         lblFormTitulo.setText("Nueva playlist");
         txtNombre.clear();
@@ -189,7 +192,6 @@ public class PlaylistsController {
         btnEliminar.setDisable(true);
         lblMensaje.setText("");
         actualizarCupoPlaylists();
-        tblPlaylists.getSelectionModel().clearSelection();
     }
 
     private void actualizarCupoPlaylists() {
@@ -214,6 +216,7 @@ public class PlaylistsController {
     @FXML
     private void limpiarBusqueda() {
         txtBuscar.clear();
+        chkSoloMias.setSelected(false);
         recargar();
     }
 

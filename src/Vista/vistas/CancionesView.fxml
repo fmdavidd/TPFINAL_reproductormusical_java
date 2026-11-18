@@ -20,6 +20,11 @@
             <Button text="Limpiar" onAction="#limpiarBusqueda"/>
             <CheckBox fx:id="chkInactivas" text="Ver inactivas" onAction="#recargar"/>
         </HBox>
+        <FlowPane hgap="8" vgap="8">
+            <ComboBox fx:id="filtroArtista" promptText="Todos los artistas" prefWidth="180"/>
+            <ComboBox fx:id="filtroAlbum" promptText="Todos los albumes" prefWidth="180"/>
+            <MenuButton fx:id="filtroGeneros" text="Todos los generos" prefWidth="190"/>
+        </FlowPane>
         <TableView fx:id="tblCanciones" VBox.vgrow="ALWAYS">
             <columns>
                 <TableColumn fx:id="colTitulo" text="Titulo" prefWidth="195"/>

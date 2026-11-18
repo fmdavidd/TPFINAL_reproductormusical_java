@@ -71,11 +71,11 @@ public class ReproductorMusical {
             detener();
             return;
         }
-        cola.remove(indiceActual);
-        if (cola.isEmpty() || indiceActual >= cola.size()) {
-            detener();
+        if (indiceActual == cola.size() - 1) {
+            estado = EstadoReproduccion.DETENIDO;
             return;
         }
+        cola.remove(indiceActual);
         estado = EstadoReproduccion.REPRODUCIENDO;
         mostrarActual();
     }
@@ -90,7 +90,7 @@ public class ReproductorMusical {
             estado = EstadoReproduccion.REPRODUCIENDO;
             mostrarActual();
         } else {
-            detener();
+            estado = EstadoReproduccion.DETENIDO;
             System.out.println("Se termino la cola.");
         }
     }

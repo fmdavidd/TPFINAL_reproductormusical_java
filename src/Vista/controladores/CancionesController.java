@@ -5,6 +5,8 @@ import Vista.App;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import Enumeraciones.Genero;
 import javafx.collections.FXCollections;
@@ -12,6 +14,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.CustomMenuItem;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -28,6 +33,9 @@ public class CancionesController {
 
     @FXML private TextField txtBuscar;
     @FXML private CheckBox chkInactivas;
+    @FXML private ComboBox<Artista> filtroArtista;
+    @FXML private ComboBox<Album> filtroAlbum;
+    @FXML private MenuButton filtroGeneros;
     @FXML private TableView<Cancion> tblCanciones;
     @FXML private TableColumn<Cancion, String> colTitulo;
     @FXML private TableColumn<Cancion, String> colArtista;
@@ -52,6 +60,7 @@ public class CancionesController {
     @FXML private Label lblMensaje;
 
     private Cancion seleccionada;
+    private final Map<Genero, CheckBox> generosFiltrados = new LinkedHashMap<>();
 
     @FXML
     private void initialize() {
@@ -96,6 +105,28 @@ public class CancionesController {
             return fila;
         });
 
+        filtroArtista.setConverter(Ui.conversor(Artista::getNombre, "Todos los artistas"));
+        filtroAlbum.setConverter(Ui.conversor(Album::getTitulo, "Todos los albumes"));
+        filtroArtista.getItems().add(null);
+        filtroAlbum.getItems().add(null);
+        MenuItem todos = new MenuItem("Todos los generos");
+        todos.setOnAction(evento -> {
+            generosFiltrados.values().forEach(opcion -> opcion.setSelected(false));
+            actualizarTextoGeneros();
+            recargar();
+        });
+        filtroGeneros.getItems().add(todos);
+        for (Genero genero : Genero.values()) {
+            CheckBox opcion = new CheckBox(genero.name());
+            generosFiltrados.put(genero, opcion);
+            opcion.setOnAction(evento -> {
+                actualizarTextoGeneros();
+                recargar();
+            });
+            filtroGeneros.getItems().add(new CustomMenuItem(opcion, false));
+        }
+        filtroArtista.setOnAction(evento -> recargar());
+        filtroAlbum.setOnAction(evento -> recargar());
         cargarAlbumes(0);
         recargar();
         nueva();
@@ -125,9 +156,7 @@ public class CancionesController {
         Integer seleccionadoId = seleccionada != null ? seleccionada.getIdCancion() : null;
         List<Cancion> canciones = new ArrayList<>();
         String texto = txtBuscar.getText() != null ? txtBuscar.getText().trim() : "";
-        canciones.addAll(texto.isEmpty()
-                ? App.getCanciones().listar()
-                : App.getCanciones().buscarPorTitulo(texto));
+        canciones.addAll(App.getCanciones().listar());
 
         if (chkInactivas.isSelected()) {
             Ui.ejecutar("Canciones", () -> {
@@ -146,10 +175,47 @@ public class CancionesController {
             });
         }
 
+        for (Cancion cancion : canciones) {
+            Artista artista = cancion.getArtista();
+            Album album = cancion.getAlbum();
+            if (artista != null && filtroArtista.getItems().stream()
+                    .noneMatch(a -> a != null && a.getIdArtista() == artista.getIdArtista())) {
+                filtroArtista.getItems().add(artista);
+            }
+            if (album != null && filtroAlbum.getItems().stream()
+                    .noneMatch(a -> a != null && a.getIdAlbum() == album.getIdAlbum())) {
+                filtroAlbum.getItems().add(album);
+            }
+        }
+        canciones.removeIf(cancion -> !coincideFiltros(cancion, texto));
         tblCanciones.getItems().setAll(canciones);
         if (seleccionadoId != null) {
             seleccionar(seleccionadoId);
         }
+    }
+
+    private boolean coincideFiltros(Cancion cancion, String texto) {
+        Artista artista = filtroArtista.getValue();
+        Album album = filtroAlbum.getValue();
+        boolean todosLosGeneros = generosFiltrados.values().stream().noneMatch(CheckBox::isSelected);
+        CheckBox genero = generosFiltrados.get(cancion.getGenero());
+        return cancion.getTitulo().toLowerCase().contains(texto.toLowerCase())
+                && (artista == null || (cancion.getArtista() != null
+                    && cancion.getArtista().getIdArtista() == artista.getIdArtista()))
+                && (album == null || (cancion.getAlbum() != null
+                    && cancion.getAlbum().getIdAlbum() == album.getIdAlbum()))
+                && (todosLosGeneros || (genero != null && genero.isSelected()));
+    }
+
+    private void actualizarTextoGeneros() {
+        List<String> nombres = new ArrayList<>();
+        generosFiltrados.forEach((genero, opcion) -> {
+            if (opcion.isSelected()) {
+                nombres.add(genero.name());
+            }
+        });
+        filtroGeneros.setText(nombres.isEmpty() ? "Todos los generos"
+                : nombres.size() == 1 ? nombres.get(0) : nombres.size() + " generos seleccionados");
     }
 
     private void seleccionar(int id) {
@@ -243,6 +309,10 @@ public class CancionesController {
     @FXML
     private void limpiarBusqueda() {
         txtBuscar.clear();
+        filtroArtista.setValue(null);
+        filtroAlbum.setValue(null);
+        generosFiltrados.values().forEach(opcion -> opcion.setSelected(false));
+        actualizarTextoGeneros();
         recargar();
     }
 
@@ -270,6 +340,10 @@ public class CancionesController {
         }
         if (duracion <= 0) {
             lblMensaje.setText("La duracion debe ser un numero mayor a cero.");
+            return;
+        }
+        if (duracion > 100 * 3600) {
+            lblMensaje.setText("La duracion no puede superar las 100 horas (360000 segundos).");
             return;
         }
 

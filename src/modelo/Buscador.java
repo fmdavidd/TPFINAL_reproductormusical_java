@@ -1,6 +1,7 @@
 package modelo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -20,13 +21,17 @@ public class Buscador<T> {
     }
 
     public List<T> buscar(String consulta, Genero genero) {
+        return buscarPorGeneros(consulta, genero == null ? Collections.emptySet() : Collections.singleton(genero));
+    }
+
+    public List<T> buscarPorGeneros(String consulta, Set<Genero> seleccionados) {
         String buscado = consulta == null ? "" : consulta.trim().toLowerCase();
         List<T> resultado = new ArrayList<T>();
         for (T elemento : elementos) {
             if (!coincideTexto(elemento, buscado)) {
                 continue;
             }
-            if (genero != null && !coincideGenero(elemento, genero)) {
+            if (seleccionados != null && !seleccionados.isEmpty() && !coincideGenero(elemento, seleccionados)) {
                 continue;
             }
             resultado.add(elemento);
@@ -46,8 +51,8 @@ public class Buscador<T> {
         return valor != null && valor.toLowerCase().contains(buscado);
     }
 
-    private boolean coincideGenero(T elemento, Genero genero) {
+    private boolean coincideGenero(T elemento, Set<Genero> seleccionados) {
         Set<Genero> valores = generos == null ? null : generos.apply(elemento);
-        return valores != null && valores.contains(genero);
+        return valores != null && !Collections.disjoint(valores, seleccionados);
     }
 }
