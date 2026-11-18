@@ -10,11 +10,8 @@ import modelo.Usuario;
 import modelo.UsuarioAdministrador;
 import modelo.UsuarioNormal;
 
-// Reglas de negocio que la consola tenia mezcladas con el menu. Quedan en la
-// capa de vista para no modificar los services.
+// Reglas de negocio compartidas por las vistas.
 public final class Reglas {
-
-    public static final int LIMITE_PLAYLISTS_SIN_PREMIUM = 3;
 
     private Reglas() {
     }
@@ -66,25 +63,6 @@ public final class Reglas {
     public static boolean esPremium() {
         Usuario u = usuario();
         return u instanceof UsuarioNormal && ((UsuarioNormal) u).esPremium();
-    }
-
-    // el limite de 3 playlists es solo para cuentas normales sin premium
-    public static boolean puedeCrearPlaylist() {
-        Usuario u = usuario();
-        if (!(u instanceof UsuarioNormal)) {
-            return false;
-        }
-        UsuarioNormal normal = (UsuarioNormal) u;
-        if (normal.esPremium()) {
-            return true;
-        }
-        return App.getPlaylists().listarPorUsuario(normal.getIdUsuario()).size()
-                < LIMITE_PLAYLISTS_SIN_PREMIUM;
-    }
-
-    public static String mensajeLimitePlaylists() {
-        return "Las cuentas no premium pueden crear hasta " + LIMITE_PLAYLISTS_SIN_PREMIUM
-                + " playlists. Las cuentas premium pueden crear playlists ilimitadas.";
     }
 
     public static String descripcionRol() {

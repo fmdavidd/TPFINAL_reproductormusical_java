@@ -1,5 +1,6 @@
 package Vista.controladores;
 
+import Service.PlaylistService;
 import Vista.App;
 
 import Seguridad.Seguridad;
@@ -48,7 +49,7 @@ public class PerfilController {
             int playlists = App.getPlaylists().listarPorUsuario(usuario.getIdUsuario()).size();
             String cupo = normal.esPremium()
                     ? playlists + " (ilimitadas)"
-                    : playlists + "/" + Reglas.LIMITE_PLAYLISTS_SIN_PREMIUM;
+                    : playlists + "/" + PlaylistService.LIMITE_PLAYLISTS_SIN_PREMIUM;
             lblResumen.setText("Favoritos: " + normal.getFavoritos().size()
                     + "  |  Playlists: " + cupo);
         } else {

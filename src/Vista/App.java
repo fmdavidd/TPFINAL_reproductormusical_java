@@ -38,7 +38,7 @@ public class App extends Application {
             canciones = new CancionService();
             // albumes y playlists usan el mismo catalogo de canciones
             albumes = new AlbumService(canciones);
-            playlists = new PlaylistService(canciones);
+            playlists = new PlaylistService(canciones, usuarios);
         } catch (ConexionBDException e) {
             new Alert(Alert.AlertType.ERROR, "No se pudo conectar a MySQL: " + e.getMessage()).showAndWait();
             Platform.exit();

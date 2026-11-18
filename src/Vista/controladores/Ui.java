@@ -13,6 +13,7 @@ import Excepciones.ConexionBDException;
 import Excepciones.CredencialesInvalidasException;
 import Excepciones.ElementoDuplicadoException;
 import Excepciones.ElementoNoEncontradoException;
+import Excepciones.LimitePlaylistsException;
 import Excepciones.PermisoDenegadoException;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.binding.Bindings;
@@ -35,7 +36,7 @@ public final class Ui {
     public interface Accion {
         void run() throws ConexionBDException, ElementoDuplicadoException,
                 ElementoNoEncontradoException, CredencialesInvalidasException,
-                PermisoDenegadoException;
+                PermisoDenegadoException, LimitePlaylistsException;
     }
 
     // Ejecuta una operacion de negocio y muestra el error si algo falla.
@@ -45,7 +46,7 @@ public final class Ui {
             return true;
         } catch (ConexionBDException | ElementoDuplicadoException
                 | ElementoNoEncontradoException | CredencialesInvalidasException
-                | PermisoDenegadoException e) {
+                | PermisoDenegadoException | LimitePlaylistsException e) {
             error(titulo, e);
             return false;
         }

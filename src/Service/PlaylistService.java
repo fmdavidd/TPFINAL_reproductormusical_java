@@ -9,26 +9,37 @@ import DAO.PlaylistDAO;
 import Excepciones.ConexionBDException;
 import Excepciones.ElementoDuplicadoException;
 import Excepciones.ElementoNoEncontradoException;
+import Excepciones.LimitePlaylistsException;
 import modelo.Cancion;
 import modelo.Playlist;
+import modelo.Usuario;
+import modelo.UsuarioNormal;
 
 public class PlaylistService {
 
+    public static final int LIMITE_PLAYLISTS_SIN_PREMIUM = 3;
+
     private PlaylistDAO playlistDAO = new PlaylistDAO();
     private CancionService cancionService;
+    private UsuarioService usuarioService;
 
     private Map<Integer, Playlist> playlists = new LinkedHashMap<>();
 
-    public PlaylistService(CancionService cancionService) throws ConexionBDException {
+    public PlaylistService(CancionService cancionService, UsuarioService usuarioService)
+            throws ConexionBDException {
         this.cancionService = cancionService;
+        this.usuarioService = usuarioService;
         for (Playlist p : playlistDAO.listarActivos()) {
             playlists.put(p.getIdPlaylist(), p);
         }
     }
 
 
-    public void alta(Playlist p) throws ConexionBDException, ElementoDuplicadoException {
+    public void alta(Playlist p)
+            throws ConexionBDException, ElementoDuplicadoException,
+            ElementoNoEncontradoException, LimitePlaylistsException {
         validarDuplicado(p);
+        validarLimite(p);
         int id = playlistDAO.insertar(p);
         if (id <= 0) {
             throw new ConexionBDException("No se pudo dar de alta la playlist");
@@ -140,6 +151,25 @@ public class PlaylistService {
             }
         }
         return false;
+    }
+
+    // el limite de playlists depende del propietario: solo aplica a cuentas
+    // normales sin premium
+    private void validarLimite(Playlist p)
+            throws ElementoNoEncontradoException, LimitePlaylistsException {
+        Usuario propietario = usuarioService.buscarPorId(p.getIdPropietario());
+        if (!(propietario instanceof UsuarioNormal)) {
+            return;
+        }
+        UsuarioNormal normal = (UsuarioNormal) propietario;
+        if (normal.esPremium()) {
+            return;
+        }
+        if (listarPorUsuario(normal.getIdUsuario()).size() >= LIMITE_PLAYLISTS_SIN_PREMIUM) {
+            throw new LimitePlaylistsException("Las cuentas no premium pueden crear hasta "
+                    + LIMITE_PLAYLISTS_SIN_PREMIUM
+                    + " playlists. Las cuentas premium pueden crear playlists ilimitadas.");
+        }
     }
 
     // el nombre puede repetirse entre usuarios, pero no dentro de la misma cuenta
