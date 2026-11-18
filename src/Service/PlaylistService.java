@@ -104,7 +104,7 @@ public class PlaylistService {
         try {
             playlistDAO.guardarOrden(idPlaylist, p.getCanciones());
         } catch (ConexionBDException e) {
-            // Si falla la base, la coleccion en memoria vuelve al orden anterior.
+            // si falla la BD, deshacemos el movimiento tb en memoria
             p.moverCancion(destino, origen);
             throw e;
         }
@@ -142,6 +142,7 @@ public class PlaylistService {
         return false;
     }
 
+    // el nombre puede repetirse entre usuarios, pero no dentro de la misma cuenta
     private void validarDuplicado(Playlist p) throws ElementoDuplicadoException {
         for (Playlist otra : playlists.values()) {
             if (otra.getIdPlaylist() != p.getIdPlaylist()

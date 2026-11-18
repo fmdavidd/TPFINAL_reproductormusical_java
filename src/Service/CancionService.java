@@ -16,6 +16,7 @@ public class CancionService {
 
     private CancionDAO cancionDAO = new CancionDAO();
 
+    // guardamos las activas en memoria para no consultar la BD en cada busqueda
     private Map<Integer, Cancion> canciones = new LinkedHashMap<>();
 
     public CancionService() throws ConexionBDException {
@@ -66,6 +67,7 @@ public class CancionService {
         if (c == null) {
             throw new ElementoNoEncontradoException("No existe la cancion con id " + id);
         }
+        // primero hay que recuperar el artista y el album, si la cancion tiene uno
         if (!c.getArtista().isActivo()) {
             throw new ElementoNoEncontradoException("El artista de la cancion esta dado de baja: reactivalo primero");
         }
@@ -87,6 +89,7 @@ public class CancionService {
         return c;
     }
 
+    // devolvemos otra lista para que la vista no pueda vaciar la coleccion del service
     public List<Cancion> listar() {
         return new ArrayList<>(canciones.values());
     }

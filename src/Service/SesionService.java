@@ -22,6 +22,7 @@ public class SesionService {
         if (u == null || !u.verificarContrasenia(contrasenia)) {
             throw new CredencialesInvalidasException("Email o contrasenia incorrectos");
         }
+        // la sesion se guarda recien despues de validar las credenciales
         usuarioActual = u;
         return u;
     }
@@ -39,8 +40,7 @@ public class SesionService {
         usuarioActual = null;
     }
 
-    // Se usa cuando el usuario modifica sus propios datos: el service reemplaza
-    // la instancia y la sesion tiene que apuntar a la nueva.
+    // al editar el perfil se reemplaza el objeto, la sesion tiene que usar el nuevo
     public void refrescar(Usuario usuario) {
         usuarioActual = usuario;
     }

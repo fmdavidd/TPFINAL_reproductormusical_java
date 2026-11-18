@@ -104,6 +104,7 @@ public class ReproductorBarController {
         }
     }
 
+    // evita que actualizar la barra desde el audio dispare otra busqueda de posicion
     private void sincronizarProgreso(double fraccion) {
         sincronizandoProgreso = true;
         sldProgreso.setValue(fraccion);

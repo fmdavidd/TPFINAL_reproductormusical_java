@@ -36,6 +36,7 @@ public class App extends Application {
             sesion = new SesionService(usuarios);
             artistas = new ArtistaService();
             canciones = new CancionService();
+            // albumes y playlists usan el mismo catalogo de canciones
             albumes = new AlbumService(canciones);
             playlists = new PlaylistService(canciones);
         } catch (ConexionBDException e) {

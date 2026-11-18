@@ -48,6 +48,7 @@ public final class ContextoNavegacion {
             return null;
         }
         Destino destino = pendiente;
+        // se consume una sola vez, asi no queda una seleccion vieja al volver
         pendiente = null;
         return destino;
     }

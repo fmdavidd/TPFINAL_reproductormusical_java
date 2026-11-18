@@ -90,6 +90,7 @@ public class UsuarioService {
     public boolean agregarFavorito(int idUsuario, int idCancion)
             throws ConexionBDException, ElementoNoEncontradoException {
         UsuarioNormal u = obtenerNormal(idUsuario);
+        // actualizamos la memoria solo si el favorito se guardo en la BD
         if (usuarioDAO.agregarFavorito(idUsuario, idCancion)) {
             u.agregarFavorito(idCancion);
             return true;
@@ -149,6 +150,7 @@ public class UsuarioService {
         return (UsuarioNormal) u;
     }
 
+    // al editar, el propio email no cuenta como duplicado
     private void validarEmail(Usuario u) throws ElementoDuplicadoException {
         for (Usuario otro : usuarios) {
             if (otro.getIdUsuario() != u.getIdUsuario() && otro.getEmail().equalsIgnoreCase(u.getEmail())) {

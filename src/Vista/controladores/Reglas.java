@@ -68,6 +68,7 @@ public final class Reglas {
         return u instanceof UsuarioNormal && ((UsuarioNormal) u).esPremium();
     }
 
+    // el limite de 3 playlists es solo para cuentas normales sin premium
     public static boolean puedeCrearPlaylist() {
         Usuario u = usuario();
         if (!(u instanceof UsuarioNormal)) {

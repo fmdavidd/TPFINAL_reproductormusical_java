@@ -91,7 +91,7 @@ public abstract class Usuario {
         activo = false;
     }
 
-    // Pendiente: verificarContrasenia(String) se resolvera en el servicio de autenticacion.
+    // comparamos hashes usando el salt guardado, no hace falta recuperar la contrasenia
 
     public boolean verificarContrasenia(String contrasenia) {
         return hashContrasenia.equals(Seguridad.hashear(contrasenia, salt));

@@ -53,6 +53,7 @@ public class Buscador<T> {
 
     private boolean coincideGenero(T elemento, Set<Genero> seleccionados) {
         Set<Genero> valores = generos == null ? null : generos.apply(elemento);
+        // alcanza con que coincida uno de los generos elegidos
         return valores != null && !Collections.disjoint(valores, seleccionados);
     }
 }

@@ -110,8 +110,7 @@ public class PlaylistDAO extends GenericDAO<Playlist> {
         }
     }
 
-    // Persiste el orden actual de la playlist reescribiendo la columna posicion
-    // de todos los vinculos en una sola transaccion.
+    // se reemplazan los vinculos en una transaccion: si algo falla, queda el orden anterior
     public void guardarOrden(int idPlaylist, List<Cancion> canciones) throws ConexionBDException {
         String sqlBorrar = "DELETE FROM playlist_cancion WHERE id_playlist = ?";
         String sqlInsertar = "INSERT INTO playlist_cancion (id_playlist, id_cancion, posicion) VALUES (?, ?, ?)";
