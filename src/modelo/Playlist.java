@@ -48,6 +48,7 @@ public class Playlist implements Reproducible {
         if (canciones == null) {
             this.canciones = new ArrayList<>();
         } else {
+            // copiamos la lista para que cambios desde afuera no alteren la playlist
             this.canciones = new ArrayList<>(canciones);
         }
 
@@ -78,6 +79,7 @@ public class Playlist implements Reproducible {
             throw new IndexOutOfBoundsException("Las posiciones deben existir en la playlist.");
         }
 
+        // las demas canciones se corren solas al quitar e insertar en la lista
         Cancion cancion = canciones.remove(posicionOrigen);
         canciones.add(posicionDestino, cancion);
     }

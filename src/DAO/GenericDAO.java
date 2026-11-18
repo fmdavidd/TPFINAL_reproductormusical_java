@@ -13,6 +13,7 @@ import java.util.List;
 import Excepciones.ConexionBDException;
 
 
+// cada DAO indica su tabla y como armar el objeto a partir de una fila
 public abstract class GenericDAO<T> implements IGenericDAO<T> {
 
     protected abstract String getNombreTabla();

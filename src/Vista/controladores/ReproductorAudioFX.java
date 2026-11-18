@@ -236,6 +236,7 @@ public final class ReproductorAudioFX {
             media.setOnEndOfMedia(this::siguienteAlTerminar);
             media.currentTimeProperty().addListener((obs, anterior, nuevo) ->
                     posicion.set(nuevo == null ? 0 : nuevo.toSeconds()));
+            // al cargar el audio usamos su duracion real en lugar de la guardada en la BD
             media.totalDurationProperty().addListener((obs, anterior, nuevo) -> {
                 if (nuevo != null && nuevo.toSeconds() > 0) {
                     duracion.set(nuevo.toSeconds());
@@ -269,6 +270,7 @@ public final class ReproductorAudioFX {
     private void liberarMedia() {
         if (media != null) {
             media.stop();
+            // libera el archivo y los recursos del reproductor anterior
             media.dispose();
             media = null;
         }

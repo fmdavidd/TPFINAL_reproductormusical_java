@@ -30,6 +30,7 @@ public final class AgregarAPlaylistDialog {
             return;
         }
 
+        // para agregar desde aca mostramos solo las playlists de la cuenta actual
         List<Playlist> propias = App.getPlaylists().listarPorUsuario(usuario.getIdUsuario());
         if (propias.isEmpty()) {
             Ui.info("Agregar a playlist",

@@ -6,7 +6,7 @@ import java.util.List;
 import Enumeraciones.EstadoReproduccion;
 import Interfaces.Reproducible;
 
-// Reproductor en consola
+// maneja la cola y el estado; el audio real queda a cargo de JavaFX
 public class ReproductorMusical {
 
     private List<Reproducible> cola = new ArrayList<>();
@@ -75,6 +75,7 @@ public class ReproductorMusical {
             estado = EstadoReproduccion.DETENIDO;
             return;
         }
+        // al sacar la que termino, la siguiente queda en el mismo indice
         cola.remove(indiceActual);
         estado = EstadoReproduccion.REPRODUCIENDO;
         mostrarActual();

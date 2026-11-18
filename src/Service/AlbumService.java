@@ -99,6 +99,7 @@ public class AlbumService {
         return resultado;
     }
 
+    // buscamos en el service para tomar las canciones activas del album
     public List<Cancion> listarCanciones(int idAlbum) throws ElementoNoEncontradoException {
         buscarPorId(idAlbum);
         List<Cancion> resultado = new ArrayList<>();

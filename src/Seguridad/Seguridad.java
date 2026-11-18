@@ -10,6 +10,7 @@ public class Seguridad {
 
     private static final String ALGORITMO = "SHA-256";
 
+    // un salt distinto por usuario evita hashes iguales si repiten la contrasenia
     public static String generarSalt() {
         byte[] bytes = new byte[16];
         new SecureRandom().nextBytes(bytes);
