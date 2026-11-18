@@ -43,8 +43,27 @@ public final class Reglas {
         return n == NivelAdmin.EDITOR || n == NivelAdmin.SUPERADMIN;
     }
 
-    public static boolean puedeGestionarUsuarios() {
+    public static boolean puedeVerUsuarios() {
+        return esAdmin();
+    }
+
+    public static boolean puedeEditarUsuarios() {
+        NivelAdmin n = nivel();
+        return n == NivelAdmin.EDITOR || n == NivelAdmin.SUPERADMIN;
+    }
+
+    public static boolean puedeGestionarAdministradores() {
         return nivel() == NivelAdmin.SUPERADMIN;
+    }
+
+    public static boolean puedeModificarUsuario(Usuario objetivo) {
+        if (objetivo == null || !puedeEditarUsuarios()) {
+            return false;
+        }
+        if (objetivo instanceof UsuarioAdministrador) {
+            return puedeGestionarAdministradores();
+        }
+        return true;
     }
 
     public static boolean esPropietario(Playlist playlist) {

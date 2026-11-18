@@ -53,8 +53,8 @@ public class UsuariosController {
     @FXML
     private void initialize() {
         tblUsuarios.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
-        if (!Reglas.puedeGestionarUsuarios()) {
-            lblInfo.setText("Solo el SUPERADMIN puede gestionar usuarios.");
+        if (!Reglas.puedeVerUsuarios()) {
+            lblInfo.setText("No tenes permisos para ver usuarios.");
             formulario.setDisable(true);
             chkInactivos.setDisable(true);
             return;
@@ -86,8 +86,10 @@ public class UsuariosController {
 
     private void aplicarTipo() {
         boolean admin = "Administrador".equals(cmbTipo.getValue());
-        cmbNivel.setDisable(!admin || esSeleccionadoMismoUsuario());
-        chkPremium.setDisable(admin);
+        cmbNivel.setDisable(!Reglas.puedeEditarUsuarios()
+                || !Reglas.puedeGestionarAdministradores()
+                || !admin || esSeleccionadoMismoUsuario());
+        chkPremium.setDisable(!Reglas.puedeEditarUsuarios() || admin);
         if (!admin) {
             cmbNivel.getSelectionModel().clearSelection();
         } else if (cmbNivel.getValue() == null) {
@@ -102,7 +104,7 @@ public class UsuariosController {
 
     @FXML
     private void recargar() {
-        if (!Reglas.puedeGestionarUsuarios()) {
+        if (!Reglas.puedeVerUsuarios()) {
             return;
         }
         Integer seleccionadoId = seleccionado != null ? seleccionado.getIdUsuario() : null;
@@ -164,10 +166,13 @@ public class UsuariosController {
         lblPassInfo.setText("Nueva contrasenia (opcional)");
 
         boolean admin = usuario instanceof UsuarioAdministrador;
+        boolean puedeModificar = Reglas.puedeModificarUsuario(usuario);
         cmbTipo.setValue(admin ? "Administrador" : "Usuario normal");
         cmbTipo.setDisable(true);
-        cmbNivel.setDisable(!admin || esSeleccionadoMismoUsuario());
-        chkPremium.setDisable(admin);
+        cmbNivel.setDisable(!puedeModificar || !admin
+                || !Reglas.puedeGestionarAdministradores()
+                || esSeleccionadoMismoUsuario());
+        chkPremium.setDisable(!puedeModificar || admin);
         chkPremium.setSelected(usuario instanceof UsuarioNormal
                 && ((UsuarioNormal) usuario).esPremium());
         if (admin) {
@@ -176,11 +181,25 @@ public class UsuariosController {
             cmbNivel.getSelectionModel().clearSelection();
         }
 
+        txtNombre.setDisable(!puedeModificar);
+        txtEmail.setDisable(!puedeModificar);
+        txtPass.setDisable(!puedeModificar);
+        lblPassInfo.setDisable(!puedeModificar);
+
         boolean activo = usuario.isActivo();
-        btnBaja.setDisable(!activo);
-        btnReactivar.setDisable(activo);
-        btnGuardar.setDisable(!activo);
-        lblInfo.setText(activo ? "" : "Usuario dado de baja: reactivalo para poder editarlo.");
+        btnBaja.setDisable(!puedeModificar || !activo || esSeleccionadoMismoUsuario());
+        btnReactivar.setDisable(!puedeModificar || activo);
+        btnGuardar.setDisable(!puedeModificar || !activo);
+
+        if (!Reglas.puedeEditarUsuarios()) {
+            lblInfo.setText("Solo lectura: no podes modificar usuarios.");
+        } else if (admin && !Reglas.puedeGestionarAdministradores()) {
+            lblInfo.setText("Solo el SUPERADMIN puede modificar administradores.");
+        } else if (!activo) {
+            lblInfo.setText("Usuario dado de baja: reactivalo para poder editarlo.");
+        } else {
+            lblInfo.setText("");
+        }
     }
 
     @FXML
@@ -191,17 +210,26 @@ public class UsuariosController {
         txtEmail.clear();
         txtPass.clear();
         lblPassInfo.setText("Contrasenia");
-        cmbTipo.setDisable(false);
+        txtNombre.setDisable(false);
+        txtEmail.setDisable(false);
+        txtPass.setDisable(false);
+        lblPassInfo.setDisable(false);
+        cmbTipo.setDisable(!Reglas.puedeGestionarAdministradores());
         cmbTipo.setValue("Usuario normal");
         cmbNivel.getSelectionModel().clearSelection();
         chkPremium.setSelected(false);
-        chkPremium.setDisable(false);
-        btnGuardar.setDisable(false);
+        chkPremium.setDisable(!Reglas.puedeEditarUsuarios());
+        btnGuardar.setDisable(!Reglas.puedeEditarUsuarios());
         btnBaja.setDisable(true);
         btnReactivar.setDisable(true);
         lblMensaje.setText("");
         lblInfo.setText("");
         tblUsuarios.getSelectionModel().clearSelection();
+
+        formulario.setDisable(!Reglas.puedeEditarUsuarios());
+        if (!Reglas.puedeEditarUsuarios()) {
+            lblInfo.setText("Solo lectura: no podes modificar usuarios.");
+        }
     }
 
     @FXML
@@ -217,7 +245,8 @@ public class UsuariosController {
 
     @FXML
     private void guardar() {
-        if (!Reglas.puedeGestionarUsuarios()) {
+        if (!Reglas.puedeEditarUsuarios()) {
+            lblMensaje.setText("No tenes permisos para modificar usuarios.");
             return;
         }
         String nombre = txtNombre.getText() != null ? txtNombre.getText().trim() : "";
@@ -232,6 +261,10 @@ public class UsuariosController {
         boolean admin = "Administrador".equals(cmbTipo.getValue());
 
         if (seleccionado == null) {
+            if (admin && !Reglas.puedeGestionarAdministradores()) {
+                lblMensaje.setText("Solo el SUPERADMIN puede crear administradores.");
+                return;
+            }
             if (pass.isEmpty()) {
                 lblMensaje.setText("La contrasenia es obligatoria para un usuario nuevo.");
                 return;
@@ -255,6 +288,12 @@ public class UsuariosController {
                 seleccionar(nuevo.getIdUsuario());
             }
         } else {
+            if (!Reglas.puedeModificarUsuario(seleccionado)) {
+                lblMensaje.setText(seleccionado instanceof UsuarioAdministrador
+                        ? "Solo el SUPERADMIN puede modificar administradores."
+                        : "No tenes permisos para modificar este usuario.");
+                return;
+            }
             seleccionado.setNombre(nombre);
             seleccionado.setEmail(email);
             if (!pass.isEmpty()) {
@@ -283,7 +322,15 @@ public class UsuariosController {
 
     @FXML
     private void darDeBaja() {
-        if (seleccionado == null || !Reglas.puedeGestionarUsuarios()) {
+        if (seleccionado == null) {
+            return;
+        }
+        if (!Reglas.puedeEditarUsuarios()) {
+            lblMensaje.setText("No tenes permisos para modificar usuarios.");
+            return;
+        }
+        if (!Reglas.puedeModificarUsuario(seleccionado)) {
+            lblMensaje.setText("Solo el SUPERADMIN puede modificar administradores.");
             return;
         }
         if (esSeleccionadoMismoUsuario()) {
@@ -304,7 +351,15 @@ public class UsuariosController {
 
     @FXML
     private void reactivar() {
-        if (seleccionado == null || !Reglas.puedeGestionarUsuarios()) {
+        if (seleccionado == null) {
+            return;
+        }
+        if (!Reglas.puedeEditarUsuarios()) {
+            lblMensaje.setText("No tenes permisos para modificar usuarios.");
+            return;
+        }
+        if (!Reglas.puedeModificarUsuario(seleccionado)) {
+            lblMensaje.setText("Solo el SUPERADMIN puede modificar administradores.");
             return;
         }
         int id = seleccionado.getIdUsuario();

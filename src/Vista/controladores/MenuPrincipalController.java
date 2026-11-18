@@ -30,7 +30,7 @@ public class MenuPrincipalController {
         lblRol.setText(Reglas.descripcionRol());
 
         ocultar(btnFavoritos, Reglas.esAdmin());
-        ocultar(btnUsuarios, !Reglas.puedeGestionarUsuarios());
+        ocultar(btnUsuarios, !Reglas.puedeVerUsuarios());
         ocultar(btnAcciones, !Reglas.esAdmin());
 
         inicio();
