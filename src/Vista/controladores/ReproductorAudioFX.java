@@ -101,8 +101,25 @@ public final class ReproductorAudioFX {
         estado.set(EstadoReproduccion.DETENIDO);
     }
 
+    public void limpiarCola() {
+        detener();
+    }
+
     public void siguiente() {
         cola.siguiente();
+        if (cola.getEstado() == EstadoReproduccion.DETENIDO) {
+            liberarMedia();
+            posicion.set(0);
+            duracion.set(0);
+            actual.set(null);
+            estado.set(EstadoReproduccion.DETENIDO);
+        } else {
+            sincronizar(true);
+        }
+    }
+
+    public void siguienteAlTerminar() {
+        cola.avanzarAlTerminar();
         if (cola.getEstado() == EstadoReproduccion.DETENIDO) {
             liberarMedia();
             posicion.set(0);
@@ -215,7 +232,7 @@ public final class ReproductorAudioFX {
             Media recurso = new Media(archivo.toUri().toString());
             media = new MediaPlayer(recurso);
             media.setVolume(volumen.get() / 100.0);
-            media.setOnEndOfMedia(this::siguiente);
+            media.setOnEndOfMedia(this::siguienteAlTerminar);
             media.currentTimeProperty().addListener((obs, anterior, nuevo) ->
                     posicion.set(nuevo == null ? 0 : nuevo.toSeconds()));
             media.totalDurationProperty().addListener((obs, anterior, nuevo) -> {

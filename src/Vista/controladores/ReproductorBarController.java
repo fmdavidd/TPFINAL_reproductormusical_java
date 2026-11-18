@@ -166,6 +166,11 @@ public class ReproductorBarController {
     }
 
     @FXML
+    private void limpiarCola() {
+        reproductor.limpiarCola();
+    }
+
+    @FXML
     private void siguiente() {
         reproductor.siguiente();
     }

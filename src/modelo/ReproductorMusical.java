@@ -56,9 +56,28 @@ public class ReproductorMusical {
     }
 
     public void detener() {
+        cola.clear();
         estado = EstadoReproduccion.DETENIDO;
         indiceActual = 0;
         System.out.println("Reproduccion detenida.");
+    }
+
+    public void limpiarCola() {
+        detener();
+    }
+
+    public void avanzarAlTerminar() {
+        if (cola.isEmpty() || indiceActual < 0 || indiceActual >= cola.size()) {
+            detener();
+            return;
+        }
+        cola.remove(indiceActual);
+        if (cola.isEmpty() || indiceActual >= cola.size()) {
+            detener();
+            return;
+        }
+        estado = EstadoReproduccion.REPRODUCIENDO;
+        mostrarActual();
     }
 
     public void siguiente() {

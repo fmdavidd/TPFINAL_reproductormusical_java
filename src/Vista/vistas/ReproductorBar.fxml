@@ -31,6 +31,7 @@
         <Slider fx:id="sldVolumen" min="0" max="100" value="50" prefWidth="110"/>
         <Label fx:id="lblEstado" text="DETENIDO" styleClass="texto-secundario"/>
         <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Limpiar cola" onAction="#limpiarCola"/>
         <Button text="Cola" onAction="#verCola"/>
     </HBox>
 </VBox>
