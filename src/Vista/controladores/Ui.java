@@ -15,9 +15,11 @@ import Excepciones.ElementoDuplicadoException;
 import Excepciones.ElementoNoEncontradoException;
 import Excepciones.PermisoDenegadoException;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.binding.Bindings;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.util.StringConverter;
 import modelo.Cancion;
@@ -136,6 +138,24 @@ public final class Ui {
     public static String textoCancion(Cancion cancion) {
         String artista = cancion.getArtista() != null ? cancion.getArtista().getNombre() : "?";
         return cancion.getTitulo() + " - " + artista + " (" + duracion(cancion.getDuracionSegundos()) + ")";
+    }
+
+    public static void marcarCancionActual(ListView<Cancion> lista) {
+        ReproductorAudioFX reproductor = ReproductorAudioFX.getInstancia();
+        lista.setCellFactory(lv -> {
+            ListCell<Cancion> celda = new ListCell<>();
+            celda.textProperty().bind(Bindings.createStringBinding(() -> {
+                Cancion cancion = celda.getItem();
+                if (celda.isEmpty() || cancion == null) {
+                    return null;
+                }
+                boolean actual = reproductor.getActual() instanceof Cancion
+                        && (reproductor.getActual() == cancion || (cancion.getIdCancion() > 0
+                        && ((Cancion) reproductor.getActual()).getIdCancion() == cancion.getIdCancion()));
+                return (actual ? "\u25B6 " : "") + textoCancion(cancion);
+            }, celda.itemProperty(), celda.emptyProperty(), reproductor.actualProperty()));
+            return celda;
+        });
     }
 
     // Busca el archivo de audio de forma absoluta, relativa al directorio de

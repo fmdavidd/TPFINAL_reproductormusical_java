@@ -108,7 +108,8 @@ public class ArtistasController {
                             break;
                         }
                     }
-                    if (!repetido) {
+                    if (!repetido && (texto.isEmpty()
+                            || inactivo.getNombre().toLowerCase().contains(texto.toLowerCase()))) {
                         artistas.add(inactivo);
                     }
                 }

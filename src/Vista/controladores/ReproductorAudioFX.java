@@ -108,11 +108,7 @@ public final class ReproductorAudioFX {
     public void siguiente() {
         cola.siguiente();
         if (cola.getEstado() == EstadoReproduccion.DETENIDO) {
-            liberarMedia();
-            posicion.set(0);
-            duracion.set(0);
-            actual.set(null);
-            estado.set(EstadoReproduccion.DETENIDO);
+            conservarFinal();
         } else {
             sincronizar(true);
         }
@@ -121,14 +117,19 @@ public final class ReproductorAudioFX {
     public void siguienteAlTerminar() {
         cola.avanzarAlTerminar();
         if (cola.getEstado() == EstadoReproduccion.DETENIDO) {
-            liberarMedia();
-            posicion.set(0);
-            duracion.set(0);
-            actual.set(null);
-            estado.set(EstadoReproduccion.DETENIDO);
+            conservarFinal();
         } else {
             sincronizar(true);
         }
+    }
+
+    private void conservarFinal() {
+        if (media != null) {
+            media.pause();
+            media.seek(Duration.seconds(duracion.get()));
+        }
+        posicion.set(duracion.get());
+        estado.set(EstadoReproduccion.DETENIDO);
     }
 
     public void anterior() {

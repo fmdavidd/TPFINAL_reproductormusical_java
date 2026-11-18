@@ -16,7 +16,7 @@
     <HBox spacing="8">
         <TextField fx:id="txtBuscar" promptText="Buscar canciones, albumes, playlists o artistas..."
                    HBox.hgrow="ALWAYS"/>
-        <ComboBox fx:id="cmbGenero" prefWidth="160"/>
+        <MenuButton fx:id="menuGeneros" text="Todos los generos" prefWidth="190"/>
         <Button text="Buscar" onAction="#buscar"/>
         <Button text="Limpiar" onAction="#limpiarBusqueda"/>
     </HBox>

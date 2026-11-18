@@ -3,10 +3,14 @@ package Vista.controladores;
 import Vista.App;
 
 import Seguridad.Seguridad;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 import modelo.Usuario;
 import modelo.UsuarioNormal;
 
@@ -106,8 +110,31 @@ public class PerfilController {
         if (usuario == null) {
             return;
         }
-        if (!Ui.confirmar("Dar de baja mi cuenta",
-                "Estas seguro? Se cerrara la sesion y no podras volver a ingresar.")) {
+        Dialog<ButtonType> confirmacion = new Dialog<>();
+        confirmacion.setTitle("Dar de baja mi cuenta");
+        confirmacion.setHeaderText("Se cerrara la sesion y no podras volver a ingresar.");
+        PasswordField contrasenia = new PasswordField();
+        contrasenia.setPromptText("Contrasenia actual");
+        Label error = new Label();
+        error.setWrapText(true);
+        confirmacion.getDialogPane().setContent(new VBox(8,
+                new Label("Ingresa tu contrasenia para confirmar la baja."), contrasenia, error));
+        ButtonType darDeBaja = new ButtonType("Dar de baja", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+        confirmacion.getDialogPane().getButtonTypes().setAll(darDeBaja, ButtonType.CANCEL);
+        var botonConfirmar = confirmacion.getDialogPane().lookupButton(darDeBaja);
+        botonConfirmar.disableProperty().bind(contrasenia.textProperty().isEmpty());
+        botonConfirmar.addEventFilter(ActionEvent.ACTION, evento -> {
+            if (!usuario.verificarContrasenia(contrasenia.getText())) {
+                evento.consume();
+                error.setText("La contrasenia no es correcta.");
+                contrasenia.clear();
+                contrasenia.requestFocus();
+            }
+        });
+        confirmacion.setOnShown(evento -> contrasenia.requestFocus());
+        boolean confirmada = confirmacion.showAndWait().filter(darDeBaja::equals).isPresent();
+        contrasenia.clear();
+        if (!confirmada) {
             return;
         }
         int id = usuario.getIdUsuario();

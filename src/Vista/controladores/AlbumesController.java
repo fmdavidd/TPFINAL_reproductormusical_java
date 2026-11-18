@@ -63,7 +63,7 @@ public class AlbumesController {
         }
         cmbCancion.setConverter(Ui.conversor(Ui::textoCancion));
 
-        lstCanciones.setCellFactory(lv -> Ui.celda(Ui::textoCancion));
+        Ui.marcarCancionActual(lstCanciones);
         lstCanciones.setOnMouseClicked(evento -> {
             if (evento.getClickCount() == 2) {
                 reproducir();
@@ -114,7 +114,8 @@ public class AlbumesController {
                             break;
                         }
                     }
-                    if (!repetido) {
+                    if (!repetido && (texto.isEmpty()
+                            || inactivo.getTitulo().toLowerCase().contains(texto))) {
                         albumes.add(inactivo);
                     }
                 }
